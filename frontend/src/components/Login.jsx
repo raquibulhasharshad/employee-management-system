@@ -2,10 +2,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import './Auth.css';
 
-
 const Login = () => {
   const navigate = useNavigate();
-
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -22,15 +20,14 @@ const Login = () => {
     fetch("http://localhost:5000/api/auth/login", {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password })
+      body: JSON.stringify({ email, password }),
+      credentials: 'include'  
     })
       .then(res => {
         if (!res.ok) throw new Error('Invalid email or password');
         return res.json();
       })
-      .then(data => {
-        alert("Login successful!");
-        localStorage.setItem('token', data.token);
+      .then(() => {
         navigate("/dashboard");
       })
       .catch(err => setError(err.message || "Login failed"));

@@ -3,7 +3,10 @@ import Employee from "../model/employeeModel";
 
 const getAllEmployees = async (req: express.Request, res: express.Response): Promise<void> => {
     try {
-        const employees = await Employee.find();
+        // @ts-ignore
+        const userId = req.user.id;
+
+        const employees = await Employee.find({ createdBy: userId });
         const formattedEmployees = employees.map(emp => ({
             id: emp._id,
             name: emp.name,
@@ -20,7 +23,13 @@ const getAllEmployees = async (req: express.Request, res: express.Response): Pro
 
 const addEmployees = async (req: express.Request, res: express.Response): Promise<void> => {
     try {
-        const newEmployee = new Employee(req.body);
+        // @ts-ignore
+        const userId = req.user.id;
+
+        const newEmployee = new Employee({
+            ...req.body,
+            createdBy: userId 
+        });
         await newEmployee.save();
 
         res.status(201).json({
@@ -39,7 +48,14 @@ const addEmployees = async (req: express.Request, res: express.Response): Promis
 const updateEmployees = async (req: express.Request, res: express.Response): Promise<void> => {
     try {
         const { id } = req.params;
-        const updated = await Employee.findByIdAndUpdate(id, req.body, { new: true });
+        // @ts-ignore
+        const userId = req.user.id;
+
+        const updated = await Employee.findOneAndUpdate(
+            { _id: id, createdBy: userId },
+            req.body,
+            { new: true }
+        );
 
         if (!updated) {
             res.status(404).json({ message: "Employee not found" });
@@ -62,7 +78,13 @@ const updateEmployees = async (req: express.Request, res: express.Response): Pro
 const deleteEmployees = async (req: express.Request, res: express.Response): Promise<void> => {
     try {
         const { id } = req.params;
-        const deletedEmployee = await Employee.findByIdAndDelete(id);
+        // @ts-ignore
+        const userId = req.user.id;
+
+        const deletedEmployee = await Employee.findOneAndDelete({
+            _id: id,
+            createdBy: userId 
+        });
 
         if (!deletedEmployee) {
             res.status(404).json({ message: "Employee not found" });

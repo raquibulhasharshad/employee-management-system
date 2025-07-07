@@ -1,5 +1,6 @@
 import express from 'express';
 import User from '../model/userModel';
+import authService from '../service/auth';
 
 const handleUserSignup = async (req: express.Request, res: express.Response): Promise<void> => {
     try {
@@ -20,7 +21,6 @@ const handleUserSignup = async (req: express.Request, res: express.Response): Pr
     }
 };
 
-
 const handleUserLogin = async (req: express.Request, res: express.Response): Promise<void> => {
     try {
         const { email, password } = req.body;
@@ -32,6 +32,8 @@ const handleUserLogin = async (req: express.Request, res: express.Response): Pro
             return;
         }
 
+        const token = authService.setUser(user);
+        res.cookie('uid', token, { httpOnly: true });
         res.status(200).json({ message: "Login Successful" });
     } catch (error) {
         res.status(500).json({ message: "Login Failed", error });

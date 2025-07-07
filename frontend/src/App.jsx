@@ -13,9 +13,16 @@ const App = () => {
   const [employees, setEmployees] = useState([]);
   const [isLoading, setisLoading] = useState(true);
 
-  useEffect(() => {
-    fetch(`${API_BASE_URL}/employees`)
+  const fetchEmployees = () => {
+    fetch(`${API_BASE_URL}/employees`, {
+      method: 'GET',
+      credentials: 'include' // Send cookies
+    })
       .then(res => {
+        if (res.status === 401) {
+          window.location.href = "/login";
+          return;
+        }
         if (!res.ok) throw new Error('API Error');
         return res.json();
       })
@@ -28,6 +35,10 @@ const App = () => {
         setisLoading(false);
         showAlert("Failed to fetch employee data. Please try again.");
       });
+  };
+
+  useEffect(() => {
+    fetchEmployees();
   }, []);
 
   const [selectedRows, setSelectedRows] = useState({});
@@ -74,8 +85,13 @@ const App = () => {
       Promise.all(
         pageSelected.map(id =>
           fetch(`${API_BASE_URL}/employees/${id}`, {
-            method: 'DELETE'
+            method: 'DELETE',
+            credentials: 'include'
           }).then(res => {
+            if (res.status === 401) {
+              window.location.href = "/login";
+              return;
+            }
             if (!res.ok) throw new Error('Failed to delete employee');
             return res.json();
           })
@@ -102,9 +118,14 @@ const App = () => {
     setConfirmMode('confirm');
     setConfirmAction(() => () => {
       fetch(`${API_BASE_URL}/employees/${employee.id}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        credentials: 'include'
       })
         .then(res => {
+          if (res.status === 401) {
+            window.location.href = "/login";
+            return;
+          }
           if (!res.ok) throw new Error('Failed to delete employee');
           return res.json();
         })
@@ -145,9 +166,14 @@ const App = () => {
       fetch(`${API_BASE_URL}/employees/${employee.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify(employee)
       })
         .then(res => {
+          if (res.status === 401) {
+            window.location.href = "/login";
+            return;
+          }
           if (!res.ok) throw new Error('Failed to update employee');
           return res.json();
         })
@@ -174,9 +200,14 @@ const App = () => {
       fetch(`${API_BASE_URL}/employees`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify(newEmployee)
       })
         .then(res => {
+          if (res.status === 401) {
+            window.location.href = "/login";
+            return;
+          }
           if (!res.ok) throw new Error('Failed to add employee');
           return res.json();
         })
@@ -249,7 +280,7 @@ const App = () => {
           <Searchbar
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
-            onClear={() => setSearchQuery('')}
+            onClear={() => setSearchQuery('') }
           />
 
           {currentEmployees.length > 0 ? (
