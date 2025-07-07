@@ -1,0 +1,123 @@
+.navbar {
+  height: 50px;
+  background-color: #040d5b;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+  font-size: 16px;
+  font-weight: 500;
+  flex-wrap: wrap;
+}
+
+.navbar-left {
+  flex: 1;
+  min-width: 200px;
+}
+
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* Delete Button */
+button.Del {
+  background-color: grey;
+  border: none;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: not-allowed;
+}
+
+button.Del.inactive {
+  visibility: hidden;
+}
+
+button.Del:enabled {
+  background-color: #d9534f;
+  cursor: pointer;
+}
+
+button.Del:enabled:hover {
+  background-color: #c9302c;
+}
+
+/* Mail Button */
+button.Mail {
+  background-color: #0275d8;
+  border: none;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+button.Mail:hover {
+  background-color: #025aa5;
+}
+
+button.Mail.inactive {
+  background-color: grey;
+  cursor: not-allowed;
+  visibility: hidden;
+}
+
+/* Add Button */
+button.Add {
+  background-color: #06bb3c;
+  border: none;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+button.Add:hover {
+  background-color: #5cb85c;
+}
+
+/* Logout Button */
+button.Logout {
+  background-color: #dc3545;
+  border: none;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+button.Logout:hover {
+  background-color: #c9302c;
+}
+
+@media (max-width: 768px) {
+  .navbar {
+    flex-direction: column;
+    height: auto;
+    padding: 10px;
+    gap: 10px;
+    text-align: center;
+  }
+
+  .navbar-left,
+  .navbar-right {
+    width: 100%;
+    justify-content: center;
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .navbar-right {
+    gap: 10px;
+  }
+}

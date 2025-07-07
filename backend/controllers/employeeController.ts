@@ -1,0 +1,83 @@
+import express from "express";
+import Employee from "../model/employeeModel";
+
+const getAllEmployees = async (req: express.Request, res: express.Response): Promise<void> => {
+    try {
+        const employees = await Employee.find();
+        const formattedEmployees = employees.map(emp => ({
+            id: emp._id,
+            name: emp.name,
+            email: emp.email,
+            address: emp.address,
+            phone: emp.phone,
+            image: emp.image
+        }));
+        res.status(200).json(formattedEmployees);
+    } catch (error) {
+        res.status(500).json({ message: "Server error", error });
+    }
+};
+
+const addEmployees = async (req: express.Request, res: express.Response): Promise<void> => {
+    try {
+        const newEmployee = new Employee(req.body);
+        await newEmployee.save();
+
+        res.status(201).json({
+            id: newEmployee._id,
+            name: newEmployee.name,
+            email: newEmployee.email,
+            address: newEmployee.address,
+            phone: newEmployee.phone,
+            image: newEmployee.image
+        });
+    } catch (error) {
+        res.status(500).json({ message: "Failed to add employee", error });
+    }
+};
+
+const updateEmployees = async (req: express.Request, res: express.Response): Promise<void> => {
+    try {
+        const { id } = req.params;
+        const updated = await Employee.findByIdAndUpdate(id, req.body, { new: true });
+
+        if (!updated) {
+            res.status(404).json({ message: "Employee not found" });
+            return;
+        }
+
+        res.status(200).json({
+            id: updated._id,
+            name: updated.name,
+            email: updated.email,
+            address: updated.address,
+            phone: updated.phone,
+            image: updated.image
+        });
+    } catch (error) {
+        res.status(500).json({ message: "Failed to update employee", error });
+    }
+};
+
+const deleteEmployees = async (req: express.Request, res: express.Response): Promise<void> => {
+    try {
+        const { id } = req.params;
+        const deletedEmployee = await Employee.findByIdAndDelete(id);
+
+        if (!deletedEmployee) {
+            res.status(404).json({ message: "Employee not found" });
+            return;
+        }
+
+        res.status(200).json({ message: "Employee deleted successfully" });
+    } catch (error) {
+        res.status(500).json({ message: "Failed to delete employee", error });
+    }
+};
+
+export {
+    getAllEmployees,
+    addEmployees,
+    updateEmployees,
+    deleteEmployees
+};
