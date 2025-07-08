@@ -1,7 +1,22 @@
 import React from 'react';
 import './EmployeeTable.css';
 
-const EmployeeTable = ({ data, selectedRows, setSelectedRows, onEdit, onDeleteSingle, onMailSingle }) => {
+const EmployeeTable = ({
+  data,
+  selectedRows,
+  setSelectedRows,
+  onEdit,
+  onDeleteSingle,
+  onMailSingle,
+  onNameClick,
+}) => {
+  const toggleSelect = (id) => {
+    if (selectedRows.includes(id)) {
+      setSelectedRows(selectedRows.filter(rowId => rowId !== id));
+    } else {
+      setSelectedRows([...selectedRows, id]);
+    }
+  };
 
   const handleSelectAll = (e) => {
     if (e.target.checked) {
@@ -12,13 +27,7 @@ const EmployeeTable = ({ data, selectedRows, setSelectedRows, onEdit, onDeleteSi
     }
   };
 
-  const handleCheckboxChange = (id) => {
-    if (selectedRows.includes(id)) {
-      setSelectedRows(selectedRows.filter(i => i !== id));
-    } else {
-      setSelectedRows([...selectedRows, id]);
-    }
-  };
+  const isAllSelected = data.length > 0 && data.every(emp => selectedRows.includes(emp.id));
 
   return (
     <div className="table-container">
@@ -26,16 +35,12 @@ const EmployeeTable = ({ data, selectedRows, setSelectedRows, onEdit, onDeleteSi
         <thead>
           <tr>
             <th>
-              <input
-                type="checkbox"
-                onChange={handleSelectAll}
-                checked={selectedRows.length === data.length && data.length > 0}
-              />
+              <input type="checkbox" checked={isAllSelected} onChange={handleSelectAll} />
             </th>
             <th>Image</th>
             <th>Name</th>
+            <th>Employee ID</th>
             <th>Email</th>
-            <th>Address</th>
             <th>Phone</th>
             <th>Actions</th>
           </tr>
@@ -47,27 +52,34 @@ const EmployeeTable = ({ data, selectedRows, setSelectedRows, onEdit, onDeleteSi
                 <input
                   type="checkbox"
                   checked={selectedRows.includes(emp.id)}
-                  onChange={() => handleCheckboxChange(emp.id)}
+                  onChange={() => toggleSelect(emp.id)}
                 />
               </td>
               <td>
                 <img
-                  src={emp.image || "https://i.pravatar.cc/150?img=3"}
+                  src={emp.image || 'https://static.vecteezy.com/system/resources/thumbnails/009/292/244/small_2x/default-avatar-icon-of-social-media-user-vector.jpg' + emp.id}
                   alt={emp.name}
-                  style={{ width: "40px", height: "40px", borderRadius: "50%" }}
+                  className="employee-image"
                 />
               </td>
               <td>{emp.name}</td>
+              <td>{emp.empId || 'N/A'}</td>
               <td>{emp.email}</td>
-              <td>{emp.address}</td>
               <td>{emp.phone}</td>
               <td>
-                <span onClick={() => onEdit(index)} style={{ cursor: 'pointer' }}>✏️</span>&nbsp;
-                <span onClick={() => onDeleteSingle(index)} style={{ cursor: 'pointer' }}>🗑️</span>&nbsp;
-                <span onClick={() => onMailSingle(index)} style={{ cursor: 'pointer' }}>📧</span>
+                <button className="action-btn mail" onClick={() => onMailSingle(index)}>📧</button>
+                <button className="action-btn edit" onClick={() => onEdit(index)}>✏️</button>
+                <button className="action-btn delete" onClick={() => onDeleteSingle(index)}>🗑️</button>
               </td>
             </tr>
           ))}
+          {data.length === 0 && (
+            <tr>
+              <td colSpan="7" style={{ textAlign: 'center', padding: '20px' }}>
+                No employees found.
+              </td>
+            </tr>
+          )}
         </tbody>
       </table>
     </div>

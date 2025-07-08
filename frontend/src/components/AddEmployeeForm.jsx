@@ -1,137 +1,71 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import './AddEmployeeForm.css';
 
-const AddEmployeeForm = ({ onSave, onCancel, editData, onValidationError }) => {
-  const [form, setForm] = useState({
-    id: null,
+const AddEmployeeForm = ({ onCancel, onSave, editingData }) => {
+  const [formData, setFormData] = useState({
+    image: '',
     name: '',
     email: '',
-    address: '',
     phone: '',
-    image: ''
+    address: '',
+    empId: '',
+    department: '',
+    position: '',
+    gender: '',
+    skills: '',
+    dob: ''
   });
 
-  const [errors, setErrors] = useState({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [globalError, setGlobalError] = useState("");
-
   useEffect(() => {
-    if (editData) {
-      setForm({
-        id: editData.id || null,
-        image: editData.image || '',
-        name: editData.name || '',
-        email: editData.email || '',
-        address: editData.address || '',
-        phone: editData.phone || ''
-      });
+    if (editingData) {
+      setFormData(editingData);
     }
-  }, [editData]);
+  }, [editingData]);
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    setIsSubmitting(true);
-    const { image, name, email, address, phone } = form;
-    const newErrors = {};
-
-    if (!image) newErrors.image = "Image URL is required";
-    if (!name) newErrors.name = "Name is required";
-    if (!email) newErrors.email = "Email is required";
-    if (!address) newErrors.address = "Address is required";
-    if (!phone) newErrors.phone = "Phone is required";
-
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (email && !emailPattern.test(email)) newErrors.email = "Invalid email format";
-
-    const phonePattern = /^[0-9]{10}$/;
-    if (phone && !phonePattern.test(phone)) newErrors.phone = "Invalid 10-digit phone number";
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      setGlobalError("Please fix the highlighted fields");
-      setIsSubmitting(false);
-      return;
-    }
-
-    setErrors({});
-    setGlobalError("");
-    onSave(form);
-    setIsSubmitting(false);
+    onSave(formData);
   };
 
   return (
-    <div className="add-form-container">
-      <form onSubmit={handleSubmit} className="add-form">
+    <div className="form-overlay">
+      <div className="form-box">
+        <h2>{editingData ? 'Edit Employee' : 'Add New Employee'}</h2>
+        <form onSubmit={handleSubmit} className="form-grid">
+          <div className="image-preview">
+            <img
+              src={formData.image || "https://static.vecteezy.com/system/resources/thumbnails/009/292/244/small_2x/default-avatar-icon-of-social-media-user-vector.jpg"}
+              alt="Preview"
+            />
+          </div>
+          <input type="text" name="image" placeholder="Image URL" value={formData.image} onChange={handleChange} />
+          <input type="text" name="name" placeholder="Full Name" value={formData.name} onChange={handleChange} required />
+          <input type="text" name="empId" placeholder="Employee ID" value={formData.empId} onChange={handleChange} required />
+          <input type="email" name="email" placeholder="Email" value={formData.email} onChange={handleChange} required />
+          <input type="tel" name="phone" placeholder="Phone" value={formData.phone} onChange={handleChange} required />
+          <input type="text" name="address" placeholder="Address" value={formData.address} onChange={handleChange} required />
+          <input type="text" name="department" placeholder="Department" value={formData.department} onChange={handleChange} />
+          <input type="text" name="position" placeholder="Position" value={formData.position} onChange={handleChange} />
+          <select name="gender" value={formData.gender} onChange={handleChange}>
+            <option value="">Select Gender</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Other">Other</option>
+          </select>
+          <input type="text" name="skills" placeholder="Skills (comma separated)" value={formData.skills} onChange={handleChange} />
+          <input type="date" name="dob" value={formData.dob} onChange={handleChange} />
 
-        {globalError && <div className="global-error">{globalError}</div>}
-
-        <input
-          type="text"
-          name="image"
-          placeholder="Image URL"
-          value={form.image}
-          onChange={handleChange}
-          className={errors.image ? "input-error" : ""}
-        />
-        {errors.image && <span className="error">{errors.image}</span>}
-
-        <input
-          type="text"
-          name="name"
-          placeholder="Name"
-          value={form.name}
-          onChange={handleChange}
-          className={errors.name ? "input-error" : ""}
-        />
-        {errors.name && <span className="error">{errors.name}</span>}
-
-        <input
-          type="text"
-          name="email"
-          placeholder="Email"
-          value={form.email}
-          onChange={handleChange}
-          className={errors.email ? "input-error" : ""}
-        />
-        {errors.email && <span className="error">{errors.email}</span>}
-
-        <input
-          type="text"
-          name="address"
-          placeholder="Address"
-          value={form.address}
-          onChange={handleChange}
-          className={errors.address ? "input-error" : ""}
-        />
-        {errors.address && <span className="error">{errors.address}</span>}
-
-        <input
-          type="text"
-          name="phone"
-          placeholder="Phone"
-          value={form.phone}
-          onChange={handleChange}
-          className={errors.phone ? "input-error" : ""}
-        />
-        {errors.phone && <span className="error">{errors.phone}</span>}
-
-        {form.image && (
-          <img src={form.image} alt="Avatar Preview" />
-        )}
-
-        <div className="button-row">
-          <button type="submit" className="save-btn">
-            {isSubmitting ? "Saving..." : "Save"}
-          </button>
-          <button type="button" className="cancel-btn" onClick={onCancel}>
-            Cancel
-          </button>
-        </div>
-      </form>
+          <div className="form-buttons">
+            <button type="submit">Save</button>
+            <button type="button" className="cancel" onClick={onCancel}>Cancel</button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };

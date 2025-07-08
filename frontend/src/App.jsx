@@ -11,16 +11,16 @@ import { API_BASE_URL } from './constants';
 
 const App = () => {
   const [employees, setEmployees] = useState([]);
-  const [isLoading, setisLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
   const fetchEmployees = () => {
     fetch(`${API_BASE_URL}/employees`, {
       method: 'GET',
-      credentials: 'include' // Send cookies
+      credentials: 'include'
     })
       .then(res => {
         if (res.status === 401) {
-          window.location.href = "/login";
+          window.location.href = '/';
           return;
         }
         if (!res.ok) throw new Error('API Error');
@@ -28,11 +28,11 @@ const App = () => {
       })
       .then(data => {
         setEmployees(data);
-        setisLoading(false);
+        setIsLoading(false);
       })
       .catch(err => {
         console.error("Failed to fetch employee data:", err);
-        setisLoading(false);
+        setIsLoading(false);
         showAlert("Failed to fetch employee data. Please try again.");
       });
   };
@@ -56,11 +56,13 @@ const App = () => {
   const filteredEmployees = employees.filter(emp => {
     const query = searchQuery.toLowerCase();
     return (
-      emp.name.toLowerCase().includes(query) ||
-      emp.email.toLowerCase().includes(query) ||
-      emp.phone.toLowerCase().includes(query)
+      (emp.name ?? '').toLowerCase().includes(query) ||
+      (emp.email ?? '').toLowerCase().includes(query) ||
+      (emp.phone ?? '').toLowerCase().includes(query) ||
+      (emp.empId ?? '').toString().toLowerCase().includes(query)
     );
   });
+
 
   const recordsPerPage = 5;
   const startIndex = (currentPage - 1) * recordsPerPage;
@@ -89,7 +91,7 @@ const App = () => {
             credentials: 'include'
           }).then(res => {
             if (res.status === 401) {
-              window.location.href = "/login";
+              window.location.href = '/';
               return;
             }
             if (!res.ok) throw new Error('Failed to delete employee');
@@ -123,7 +125,7 @@ const App = () => {
       })
         .then(res => {
           if (res.status === 401) {
-            window.location.href = "/login";
+            window.location.href = '/';
             return;
           }
           if (!res.ok) throw new Error('Failed to delete employee');
@@ -162,66 +164,60 @@ const App = () => {
   };
 
   const handleSave = (employee) => {
-    if (employee.id) {
-      fetch(`${API_BASE_URL}/employees/${employee.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(employee)
+    const payload = {
+      name: employee.name,
+      email: employee.email,
+      address: employee.address,
+      phone: employee.phone,
+      image: employee.image,
+      empId: employee.empId,
+      department: employee.department,
+      position: employee.position,
+      skills: employee.skills,
+      gender: employee.gender,
+      dob: employee.dob,
+    };
+
+    const requestMethod = employee.id ? 'PUT' : 'POST';
+    const endpoint = employee.id
+      ? `${API_BASE_URL}/employees/${employee.id}`
+      : `${API_BASE_URL}/employees`;
+
+    fetch(endpoint, {
+      method: requestMethod,
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(payload),
+    })
+      .then(res => {
+        if (res.status === 401) {
+          window.location.href = '/';
+          return;
+        }
+        if (!res.ok) {
+          return res.json().then(err => {
+            throw new Error(err.message || 'Failed to save employee');
+          });
+        }
+        return res.json();
       })
-        .then(res => {
-          if (res.status === 401) {
-            window.location.href = "/login";
-            return;
-          }
-          if (!res.ok) throw new Error('Failed to update employee');
-          return res.json();
-        })
-        .then(data => {
+      .then(data => {
+        if (employee.id) {
           const updated = employees.map(emp =>
             emp.id === data.id ? data : emp
           );
           setEmployees(updated);
-          setShowForm(false);
-        })
-        .catch(err => {
-          console.error("Failed to update employee:", err);
-          showAlert("Failed to update employee. Please try again.");
-        });
-    } else {
-      const newEmployee = {
-        name: employee.name,
-        email: employee.email,
-        address: employee.address,
-        phone: employee.phone,
-        image: employee.image
-      };
-
-      fetch(`${API_BASE_URL}/employees`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(newEmployee)
-      })
-        .then(res => {
-          if (res.status === 401) {
-            window.location.href = "/login";
-            return;
-          }
-          if (!res.ok) throw new Error('Failed to add employee');
-          return res.json();
-        })
-        .then(data => {
+        } else {
           setEmployees(prev => [...prev, data]);
           const updatedTotalPages = Math.ceil((employees.length + 1) / recordsPerPage);
           setCurrentPage(updatedTotalPages);
-          setShowForm(false);
-        })
-        .catch(err => {
-          console.error("Failed to add employee:", err);
-          showAlert("Failed to add employee. Please try again.");
-        });
-    }
+        }
+        setShowForm(false);
+      })
+      .catch(err => {
+        console.error("Failed to save employee:", err);
+        showAlert(err.message || "Failed to save employee. Please try again.");
+      });
   };
 
   const showAlert = (message) => {
@@ -255,10 +251,6 @@ const App = () => {
       showAlert(data.message);
       return;
     }
-    console.log("Send to: ", data.toEmails);
-    console.log("Subject: ", data.subject);
-    console.log("Body: ", data.body);
-
     showAlert(data.message);
     setShowMailModal(false);
   };
@@ -280,7 +272,7 @@ const App = () => {
           <Searchbar
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
-            onClear={() => setSearchQuery('') }
+            onClear={() => setSearchQuery('')}
           />
 
           {currentEmployees.length > 0 ? (
@@ -320,8 +312,7 @@ const App = () => {
               <AddEmployeeForm
                 onSave={handleSave}
                 onCancel={() => setShowForm(false)}
-                editData={editEmployee}
-                onValidationError={showAlert}
+                editingData={editEmployee}
               />
             </div>
           )}
