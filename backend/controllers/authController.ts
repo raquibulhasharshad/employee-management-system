@@ -1,10 +1,13 @@
 import express from 'express';
 import User from '../model/userModel';
 import authService from '../service/auth';
+import bcrypt from 'bcrypt'
 
 const handleUserSignup = async (req: express.Request, res: express.Response): Promise<void> => {
     try {
         const { adminName, companyName, email, phone, address, password } = req.body;
+
+        const hashedPassword= await bcrypt.hash(password, 10);
 
         await User.create({
             adminName,
@@ -12,7 +15,7 @@ const handleUserSignup = async (req: express.Request, res: express.Response): Pr
             email,
             phone,
             address,
-            password
+            password: hashedPassword
         });
 
         res.status(201).json({ message: "Account created Successfully" });
@@ -25,9 +28,15 @@ const handleUserLogin = async (req: express.Request, res: express.Response): Pro
     try {
         const { email, password } = req.body;
 
-        const user = await User.findOne({ email, password });
+        const user = await User.findOne({ email });
 
         if (!user) {
+            res.status(400).json({ message: "Invalid email or password" });
+            return;
+        }
+
+        const isMatch= await bcrypt.compare(password, user.password)
+        if (!isMatch) {
             res.status(400).json({ message: "Invalid email or password" });
             return;
         }
