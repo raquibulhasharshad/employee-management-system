@@ -13,6 +13,33 @@ const App = () => {
   const [employees, setEmployees] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  const [selectedRows, setSelectedRows] = useState({});
+  const [showForm, setShowForm] = useState(false);
+  const [editEmployee, setEditEmployee] = useState(null);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [confirmAction, setConfirmAction] = useState(() => () => {});
+  const [confirmMessage, setConfirmMessage] = useState('');
+  const [confirmMode, setConfirmMode] = useState('confirm');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [showMailModal, setShowMailModal] = useState(false);
+  const [mailRecipients, setMailRecipients] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const recordsPerPage = 5;
+
+  // ✅ Check user authentication before loading anything
+  const checkAuth = async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/auth/check`, {
+        method: 'GET',
+        credentials: 'include'
+      });
+      if (!res.ok) throw new Error();
+    } catch {
+      window.location.href = '/';
+    }
+  };
+
   const fetchEmployees = () => {
     fetch(`${API_BASE_URL}/employees`, {
       method: 'GET',
@@ -38,20 +65,8 @@ const App = () => {
   };
 
   useEffect(() => {
-    fetchEmployees();
+    checkAuth().then(fetchEmployees);
   }, []);
-
-  const [selectedRows, setSelectedRows] = useState({});
-  const [showForm, setShowForm] = useState(false);
-  const [editEmployee, setEditEmployee] = useState(null);
-  const [showConfirm, setShowConfirm] = useState(false);
-  const [confirmAction, setConfirmAction] = useState(() => () => { });
-  const [confirmMessage, setConfirmMessage] = useState('');
-  const [confirmMode, setConfirmMode] = useState('confirm');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [showMailModal, setShowMailModal] = useState(false);
-  const [mailRecipients, setMailRecipients] = useState([]);
-  const [searchQuery, setSearchQuery] = useState('');
 
   const filteredEmployees = employees.filter(emp => {
     const query = searchQuery.toLowerCase();
@@ -63,7 +78,6 @@ const App = () => {
     );
   });
 
-  const recordsPerPage = 5;
   const startIndex = (currentPage - 1) * recordsPerPage;
   const currentEmployees = filteredEmployees.slice(startIndex, startIndex + recordsPerPage);
   const totalPages = Math.ceil(filteredEmployees.length / recordsPerPage);

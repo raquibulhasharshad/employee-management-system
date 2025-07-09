@@ -7,6 +7,12 @@ const handleUserSignup = async (req: express.Request, res: express.Response): Pr
   try {
     const { adminName, companyName, email, phone, address, password } = req.body;
 
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      res.status(400).json({ message: "Email already exists" });
+      return;
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
 
     await User.create({
@@ -18,9 +24,9 @@ const handleUserSignup = async (req: express.Request, res: express.Response): Pr
       password: hashedPassword
     });
 
-    res.status(201).json({ message: "Account created Successfully" });
+    res.status(201).json({ message: "Account created successfully" });
   } catch (error) {
-    res.status(500).json({ message: "Signup Failed", error });
+    res.status(500).json({ message: "Signup failed", error });
   }
 };
 
@@ -29,7 +35,6 @@ const handleUserLogin = async (req: express.Request, res: express.Response): Pro
     const { email, password } = req.body;
 
     const user = await User.findOne({ email });
-
     if (!user) {
       res.status(400).json({ message: "Invalid email or password" });
       return;
@@ -43,10 +48,16 @@ const handleUserLogin = async (req: express.Request, res: express.Response): Pro
 
     const token = authService.setUser(user);
 
-    res.cookie('uid', token, { httpOnly: true });
-    res.status(200).json({ message: "Login Successful" });
+    res.cookie('uid', token, {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: false,
+      maxAge: 24 * 60 * 60 * 1000
+    });
+
+    res.status(200).json({ message: "Login successful" });
   } catch (error) {
-    res.status(500).json({ message: "Login Failed", error });
+    res.status(500).json({ message: "Login failed", error });
   }
 };
 
@@ -55,9 +66,35 @@ const handleUserLogout = (req: express.Request, res: express.Response): void => 
     res.clearCookie('uid');
     res.status(200).json({ message: "Logout successful" });
   } catch (error) {
-    console.error("Logout error:", error);
     res.status(500).json({ message: "Logout failed", error });
   }
 };
 
-export { handleUserSignup, handleUserLogin, handleUserLogout };
+const handleAuthCheck = (req: express.Request, res: express.Response): void => {
+  try {
+    const token = req.cookies?.uid;
+
+    if (!token) {
+      res.status(401).json({ message: "Not logged in" });
+      return;
+    }
+
+    const user = authService.getUser(token);
+
+    if (!user) {
+      res.status(401).json({ message: "Invalid session" });
+      return;
+    }
+
+    res.status(200).json({ message: "Authenticated" });
+  } catch (error) {
+    res.status(500).json({ message: "Authentication check failed", error });
+  }
+};
+
+export {
+  handleUserSignup,
+  handleUserLogin,
+  handleUserLogout,
+  handleAuthCheck
+};

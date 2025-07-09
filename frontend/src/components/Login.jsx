@@ -21,7 +21,7 @@ const Login = () => {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
-      credentials: 'include'  
+      credentials: 'include'
     })
       .then(res => {
         if (!res.ok) throw new Error('Invalid email or password');
@@ -37,8 +37,20 @@ const Login = () => {
     <div className="auth-container">
       <h2>Admin Login</h2>
       <form onSubmit={handleLogin}>
-        <input type="email" placeholder="Email Address" value={email} onChange={e => setEmail(e.target.value)} required />
-        <input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} required />
+        <input
+          type="email"
+          placeholder="Email Address"
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+          required
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={e => setPassword(e.target.value)}
+          required
+        />
         {error && <div className="error-msg">{error}</div>}
         <button type="submit">Login</button>
       </form>
