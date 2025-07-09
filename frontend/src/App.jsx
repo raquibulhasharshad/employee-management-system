@@ -63,7 +63,6 @@ const App = () => {
     );
   });
 
-
   const recordsPerPage = 5;
   const startIndex = (currentPage - 1) * recordsPerPage;
   const currentEmployees = filteredEmployees.slice(startIndex, startIndex + recordsPerPage);
@@ -255,6 +254,15 @@ const App = () => {
     setShowMailModal(false);
   };
 
+  const handleLogout = () => {
+    fetch(`${API_BASE_URL}/auth/logout`, {
+      method: 'POST',
+      credentials: 'include'
+    }).then(() => {
+      window.location.href = '/';
+    });
+  };
+
   return (
     <div className="app-container">
       {isLoading ? (
@@ -267,6 +275,7 @@ const App = () => {
             onDelete={handleDeleteSelected}
             onAdd={handleAddNew}
             onMail={handleBulkMail}
+            onLogout={handleLogout}
           />
 
           <Searchbar

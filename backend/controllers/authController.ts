@@ -1,52 +1,63 @@
 import express from 'express';
 import User from '../model/userModel';
 import authService from '../service/auth';
-import bcrypt from 'bcrypt'
+import bcrypt from 'bcrypt';
 
 const handleUserSignup = async (req: express.Request, res: express.Response): Promise<void> => {
-    try {
-        const { adminName, companyName, email, phone, address, password } = req.body;
+  try {
+    const { adminName, companyName, email, phone, address, password } = req.body;
 
-        const hashedPassword= await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-        await User.create({
-            adminName,
-            companyName,
-            email,
-            phone,
-            address,
-            password: hashedPassword
-        });
+    await User.create({
+      adminName,
+      companyName,
+      email,
+      phone,
+      address,
+      password: hashedPassword
+    });
 
-        res.status(201).json({ message: "Account created Successfully" });
-    } catch (error) {
-        res.status(500).json({ message: "Signup Failed", error });
-    }
+    res.status(201).json({ message: "Account created Successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Signup Failed", error });
+  }
 };
 
 const handleUserLogin = async (req: express.Request, res: express.Response): Promise<void> => {
-    try {
-        const { email, password } = req.body;
+  try {
+    const { email, password } = req.body;
 
-        const user = await User.findOne({ email });
+    const user = await User.findOne({ email });
 
-        if (!user) {
-            res.status(400).json({ message: "Invalid email or password" });
-            return;
-        }
-
-        const isMatch= await bcrypt.compare(password, user.password)
-        if (!isMatch) {
-            res.status(400).json({ message: "Invalid email or password" });
-            return;
-        }
-
-        const token = authService.setUser(user);
-        res.cookie('uid', token, { httpOnly: true });
-        res.status(200).json({ message: "Login Successful" });
-    } catch (error) {
-        res.status(500).json({ message: "Login Failed", error });
+    if (!user) {
+      res.status(400).json({ message: "Invalid email or password" });
+      return;
     }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      res.status(400).json({ message: "Invalid email or password" });
+      return;
+    }
+
+    const token = authService.setUser(user);
+
+    res.cookie('uid', token, { httpOnly: true });
+    res.status(200).json({ message: "Login Successful" });
+  } catch (error) {
+    res.status(500).json({ message: "Login Failed", error });
+  }
 };
 
-export { handleUserSignup, handleUserLogin };
+const handleUserLogout = (req: express.Request, res: express.Response): void => {
+  try {
+    res.clearCookie('uid');
+    res.status(200).json({ message: "Logout successful" });
+  } catch (error) {
+    console.error("Logout error:", error);
+    res.status(500).json({ message: "Logout failed", error });
+  }
+};
+
+export { handleUserSignup, handleUserLogin, handleUserLogout };

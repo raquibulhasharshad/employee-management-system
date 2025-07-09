@@ -16,6 +16,8 @@ const AddEmployeeForm = ({ onCancel, onSave, editingData }) => {
     dob: ''
   });
 
+  const [errors, setErrors] = useState({});
+
   useEffect(() => {
     if (editingData) {
       setFormData(editingData);
@@ -25,10 +27,38 @@ const AddEmployeeForm = ({ onCancel, onSave, editingData }) => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    setErrors(prev => ({ ...prev, [name]: '' })); // Clear error when user types
+  };
+
+  const validate = () => {
+    const newErrors = {};
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phoneRegex = /^[0-9]{10}$/;
+
+    if (!formData.name.trim()) newErrors.name = 'Name is required';
+    if (!formData.empId.trim()) newErrors.empId = 'Employee ID is required';
+    if (!formData.email.trim()) newErrors.email = 'Email is required';
+    else if (!emailRegex.test(formData.email)) newErrors.email = 'Invalid email format';
+
+    if (!formData.phone.trim()) newErrors.phone = 'Phone number is required';
+    else if (!phoneRegex.test(formData.phone)) newErrors.phone = 'Phone number must be 10 digits';
+
+    if (!formData.address.trim()) newErrors.address = 'Address is required';
+    if (!formData.department.trim()) newErrors.department = 'Department is required';
+    if (!formData.position.trim()) newErrors.position = 'Position is required';
+    if (!formData.gender.trim()) newErrors.gender = 'Gender is required';
+    if (!formData.dob.trim()) newErrors.dob = 'Date of Birth is required';
+
+    return newErrors;
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const validationErrors = validate();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
     onSave(formData);
   };
 
@@ -43,22 +73,63 @@ const AddEmployeeForm = ({ onCancel, onSave, editingData }) => {
               alt="Preview"
             />
           </div>
-          <input type="text" name="image" placeholder="Image URL" value={formData.image} onChange={handleChange} />
-          <input type="text" name="name" placeholder="Full Name" value={formData.name} onChange={handleChange} required />
-          <input type="text" name="empId" placeholder="Employee ID" value={formData.empId} onChange={handleChange} required />
-          <input type="email" name="email" placeholder="Email" value={formData.email} onChange={handleChange} required />
-          <input type="tel" name="phone" placeholder="Phone" value={formData.phone} onChange={handleChange} required />
-          <input type="text" name="address" placeholder="Address" value={formData.address} onChange={handleChange} required />
-          <input type="text" name="department" placeholder="Department" value={formData.department} onChange={handleChange} />
-          <input type="text" name="position" placeholder="Position" value={formData.position} onChange={handleChange} />
-          <select name="gender" value={formData.gender} onChange={handleChange}>
-            <option value="">Select Gender</option>
-            <option value="Male">Male</option>
-            <option value="Female">Female</option>
-            <option value="Other">Other</option>
-          </select>
-          <input type="text" name="skills" placeholder="Skills (comma separated)" value={formData.skills} onChange={handleChange} />
-          <input type="date" name="dob" value={formData.dob} onChange={handleChange} />
+          <div>
+            <input type="text" name="image" placeholder="Image URL" value={formData.image} onChange={handleChange} />
+          </div>
+
+          <div>
+            <input type="text" name="name" placeholder="Full Name" value={formData.name} onChange={handleChange} />
+            {errors.name && <div className="error">{errors.name}</div>}
+          </div>
+
+          <div>
+            <input type="text" name="empId" placeholder="Employee ID" value={formData.empId} onChange={handleChange} />
+            {errors.empId && <div className="error">{errors.empId}</div>}
+          </div>
+
+          <div>
+            <input type="text" name="email" placeholder="Email" value={formData.email} onChange={handleChange} />
+            {errors.email && <div className="error">{errors.email}</div>}
+          </div>
+
+          <div>
+            <input type="tel" name="phone" placeholder="Phone" value={formData.phone} onChange={handleChange} />
+            {errors.phone && <div className="error">{errors.phone}</div>}
+          </div>
+
+          <div>
+            <input type="text" name="address" placeholder="Address" value={formData.address} onChange={handleChange} />
+            {errors.address && <div className="error">{errors.address}</div>}
+          </div>
+
+          <div>
+            <input type="text" name="department" placeholder="Department" value={formData.department} onChange={handleChange} />
+            {errors.department && <div className="error">{errors.department}</div>}
+          </div>
+
+          <div>
+            <input type="text" name="position" placeholder="Position" value={formData.position} onChange={handleChange} />
+            {errors.position && <div className="error">{errors.position}</div>}
+          </div>
+
+          <div>
+            <select name="gender" value={formData.gender} onChange={handleChange}>
+              <option value="">Select Gender</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Other">Other</option>
+            </select>
+            {errors.gender && <div className="error">{errors.gender}</div>}
+          </div>
+
+          <div>
+            <input type="text" name="skills" placeholder="Skills (comma separated)" value={formData.skills} onChange={handleChange} />
+          </div>
+
+          <div>
+            <input type="date" name="dob" value={formData.dob} onChange={handleChange} />
+            {errors.dob && <div className="error">{errors.dob}</div>}
+          </div>
 
           <div className="form-buttons">
             <button type="submit">Save</button>

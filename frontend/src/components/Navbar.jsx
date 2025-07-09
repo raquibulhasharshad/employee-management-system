@@ -1,13 +1,7 @@
 import React from 'react';
 import './Navbar.css';
 
-const Navbar = ({ isDeleteDisabled, isMailDisabled, onDelete, onAdd, onMail }) => {
-
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    window.location.href = '/'; 
-  };
-
+const Navbar = ({ isDeleteDisabled, isMailDisabled, onDelete, onAdd, onMail, onLogout }) => {
   return (
     <nav className="navbar">
       <div className="navbar-left">Manage Employees</div>
@@ -31,7 +25,7 @@ const Navbar = ({ isDeleteDisabled, isMailDisabled, onDelete, onAdd, onMail }) =
             ➕ Add New Employee
           </button>
         </div>
-        <button className="Logout" onClick={handleLogout}>
+        <button className="Logout" onClick={onLogout}>
           🚪 Logout
         </button>
       </div>

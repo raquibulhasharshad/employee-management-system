@@ -105,3 +105,9 @@
     width: 100%;
   }
 }
+
+.error {
+  color: red;
+  font-size: 13px;
+  margin-top: 2px;
+}
