@@ -6,13 +6,13 @@ import AddEmployeeForm from './components/AddEmployeeForm';
 import ConfirmDialog from './components/ConfirmDialog';
 import Mail from './components/Mail';
 import Searchbar from './components/Searchbar';
+import EmployeeDetailsModal from './components/EmployeeDetailsModal';
 import './App.css';
 import { API_BASE_URL } from './constants';
 
 const App = () => {
   const [employees, setEmployees] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-
   const [selectedRows, setSelectedRows] = useState({});
   const [showForm, setShowForm] = useState(false);
   const [editEmployee, setEditEmployee] = useState(null);
@@ -24,10 +24,10 @@ const App = () => {
   const [showMailModal, setShowMailModal] = useState(false);
   const [mailRecipients, setMailRecipients] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [viewEmployee, setViewEmployee] = useState(null);
 
   const recordsPerPage = 5;
 
-  // ✅ Check user authentication before loading anything
   const checkAuth = async () => {
     try {
       const res = await fetch(`${API_BASE_URL}/auth/check`, {
@@ -277,6 +277,10 @@ const App = () => {
     });
   };
 
+  const handleRowClick = (index) => {
+    setViewEmployee(employees[startIndex + index]);
+  };
+
   return (
     <div className="app-container">
       {isLoading ? (
@@ -308,6 +312,7 @@ const App = () => {
               onEdit={handleEdit}
               onDeleteSingle={handleDeleteSingle}
               onMailSingle={handleSingleMail}
+              onRowClick={handleRowClick}
             />
           ) : (
             <div className="no-records">No records found.</div>
@@ -346,6 +351,13 @@ const App = () => {
               onConfirm={confirmAction}
               onCancel={() => setShowConfirm(false)}
               mode={confirmMode}
+            />
+          )}
+
+          {viewEmployee && (
+            <EmployeeDetailsModal
+              employee={viewEmployee}
+              onClose={() => setViewEmployee(null)}
             />
           )}
         </>

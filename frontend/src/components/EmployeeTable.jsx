@@ -8,26 +8,22 @@ const EmployeeTable = ({
   onEdit,
   onDeleteSingle,
   onMailSingle,
-  onNameClick,
+  onRowClick
 }) => {
-  const toggleSelect = (id) => {
-    if (selectedRows.includes(id)) {
-      setSelectedRows(selectedRows.filter(rowId => rowId !== id));
-    } else {
-      setSelectedRows([...selectedRows, id]);
-    }
+  const handleSelectRow = (id) => {
+    const updated = selectedRows.includes(id)
+      ? selectedRows.filter(rowId => rowId !== id)
+      : [...selectedRows, id];
+    setSelectedRows(updated);
   };
 
-  const handleSelectAll = (e) => {
-    if (e.target.checked) {
-      const allIds = data.map(emp => emp.id);
-      setSelectedRows(allIds);
-    } else {
+  const handleSelectAll = () => {
+    if (selectedRows.length === data.length) {
       setSelectedRows([]);
+    } else {
+      setSelectedRows(data.map(emp => emp.id));
     }
   };
-
-  const isAllSelected = data.length > 0 && data.every(emp => selectedRows.includes(emp.id));
 
   return (
     <div className="table-container">
@@ -35,7 +31,11 @@ const EmployeeTable = ({
         <thead>
           <tr>
             <th>
-              <input type="checkbox" checked={isAllSelected} onChange={handleSelectAll} />
+              <input
+                type="checkbox"
+                checked={selectedRows.length === data.length && data.length > 0}
+                onChange={handleSelectAll}
+              />
             </th>
             <th>Image</th>
             <th>Name</th>
@@ -47,39 +47,38 @@ const EmployeeTable = ({
         </thead>
         <tbody>
           {data.map((emp, index) => (
-            <tr key={emp.id}>
-              <td>
+            <tr
+              key={emp.id}
+              onClick={() => onRowClick(index)}
+              style={{ cursor: 'pointer' }}
+            >
+              <td onClick={(e) => e.stopPropagation()}>
                 <input
                   type="checkbox"
                   checked={selectedRows.includes(emp.id)}
-                  onChange={() => toggleSelect(emp.id)}
+                  onChange={() => handleSelectRow(emp.id)}
                 />
               </td>
               <td>
                 <img
-                  src={emp.image || 'https://static.vecteezy.com/system/resources/thumbnails/009/292/244/small_2x/default-avatar-icon-of-social-media-user-vector.jpg' + emp.id}
-                  alt={emp.name}
+                  src={emp.image || '/default-avatar.png'}
+                  alt="emp"
                   className="employee-image"
                 />
               </td>
-              <td>{emp.name}</td>
-              <td>{emp.empId || 'N/A'}</td>
+              <td>
+                <span className="name-text">{emp.name}</span>
+              </td>
+              <td>{emp.empId}</td>
               <td>{emp.email}</td>
               <td>{emp.phone}</td>
-              <td>
+              <td onClick={(e) => e.stopPropagation()}>
                 <button className="action-btn mail" onClick={() => onMailSingle(index)}>📧</button>
                 <button className="action-btn edit" onClick={() => onEdit(index)}>✏️</button>
                 <button className="action-btn delete" onClick={() => onDeleteSingle(index)}>🗑️</button>
               </td>
             </tr>
           ))}
-          {data.length === 0 && (
-            <tr>
-              <td colSpan="7" style={{ textAlign: 'center', padding: '20px' }}>
-                No employees found.
-              </td>
-            </tr>
-          )}
         </tbody>
       </table>
     </div>
