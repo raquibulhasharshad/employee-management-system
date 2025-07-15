@@ -4,7 +4,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.55);
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -13,12 +13,12 @@
 
 .employee-details-modal {
   background: #fff;
-  border-radius: 10px;
+  border-radius: 12px;
   padding: 30px;
   width: 500px;
   max-width: 90%;
   position: relative;
-  box-shadow: 0 0 15px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
   font-family: 'Segoe UI', sans-serif;
   text-align: center;
 }
@@ -37,7 +37,7 @@
 .image-container {
   display: flex;
   justify-content: center;
-  margin-bottom: 15px;
+  margin-bottom: 20px;
 }
 
 .image-container img {

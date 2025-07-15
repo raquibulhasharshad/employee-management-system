@@ -1,5 +1,6 @@
 import React from 'react';
 import './EmployeeTable.css';
+import { API_BASE_URL } from '../constants';
 
 const EmployeeTable = ({
   data,
@@ -8,21 +9,30 @@ const EmployeeTable = ({
   onEdit,
   onDeleteSingle,
   onMailSingle,
-  onRowClick
+  onRowClick,
 }) => {
-  const handleSelectRow = (id) => {
-    const updated = selectedRows.includes(id)
-      ? selectedRows.filter(rowId => rowId !== id)
-      : [...selectedRows, id];
-    setSelectedRows(updated);
+  const handleSelectAll = (e) => {
+    if (e.target.checked) {
+      const allIds = data.map((emp) => emp.id);
+      setSelectedRows(allIds);
+    } else {
+      setSelectedRows([]);
+    }
   };
 
-  const handleSelectAll = () => {
-    if (selectedRows.length === data.length) {
-      setSelectedRows([]);
-    } else {
-      setSelectedRows(data.map(emp => emp.id));
+  const handleSelectOne = (id) => {
+    setSelectedRows((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+    );
+  };
+
+  const getImageUrl = (img) => {
+    if (img) {
+      return img.startsWith('/uploads')
+        ? `${API_BASE_URL.replace('/api', '')}${img}`
+        : img;
     }
+    return 'https://static.vecteezy.com/system/resources/thumbnails/009/292/244/small_2x/default-avatar-icon-of-social-media-user-vector.jpg';
   };
 
   return (
@@ -50,32 +60,30 @@ const EmployeeTable = ({
             <tr
               key={emp.id}
               onClick={() => onRowClick(index)}
-              style={{ cursor: 'pointer' }}
+              className="clickable-row"
             >
               <td onClick={(e) => e.stopPropagation()}>
                 <input
                   type="checkbox"
                   checked={selectedRows.includes(emp.id)}
-                  onChange={() => handleSelectRow(emp.id)}
+                  onChange={() => handleSelectOne(emp.id)}
                 />
               </td>
               <td>
                 <img
-                  src={emp.image || '/default-avatar.png'}
-                  alt="emp"
+                  src={getImageUrl(emp.image)}
+                  alt="Employee"
                   className="employee-image"
                 />
               </td>
-              <td>
-                <span className="name-text">{emp.name}</span>
-              </td>
+              <td>{emp.name}</td>
               <td>{emp.empId}</td>
               <td>{emp.email}</td>
               <td>{emp.phone}</td>
               <td onClick={(e) => e.stopPropagation()}>
-                <button className="action-btn mail" onClick={() => onMailSingle(index)}>📧</button>
                 <button className="action-btn edit" onClick={() => onEdit(index)}>✏️</button>
                 <button className="action-btn delete" onClick={() => onDeleteSingle(index)}>🗑️</button>
+                <button className="action-btn mail" onClick={() => onMailSingle(index)}>📧</button>
               </td>
             </tr>
           ))}

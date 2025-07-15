@@ -29,6 +29,7 @@
 
 .employee-table tr:hover {
   background-color: #f9f9f9;
+  cursor: pointer;
 }
 
 .employee-image {
@@ -36,18 +37,6 @@
   height: 40px;
   border-radius: 50%;
   object-fit: cover;
-}
-
-.name-button {
-  background: none;
-  border: none;
-  color: #007bff;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-.name-button:hover {
-  text-decoration: underline;
 }
 
 .action-btn {
@@ -73,4 +62,8 @@
 
 .action-btn.delete {
   color: #dc3545;
+}
+
+.clickable-row {
+  transition: background-color 0.2s ease;
 }
