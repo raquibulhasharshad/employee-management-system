@@ -48,11 +48,8 @@ const AddEmployeeForm = ({ onSave, onCancel, editingData }) => {
     const file = e.target.files[0];
     if (file) {
       setFormData(prev => ({ ...prev, image: file, removeImage: false }));
-
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreviewUrl(reader.result);
-      };
+      reader.onloadend = () => setPreviewUrl(reader.result);
       reader.readAsDataURL(file);
     }
   };
@@ -64,13 +61,29 @@ const AddEmployeeForm = ({ onSave, onCancel, editingData }) => {
 
   const validate = () => {
     const newErrors = {};
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phoneRegex = /^[0-9]{10}$/;
+
     if (!formData.name) newErrors.name = 'Name is required';
-    if (!formData.email) newErrors.email = 'Email is required';
-    if (!formData.phone) newErrors.phone = 'Phone is required';
+    if (!formData.email) {
+      newErrors.email = 'Email is required';
+    } else if (!emailRegex.test(formData.email)) {
+      newErrors.email = 'Invalid email format';
+    }
+
+    if (!formData.phone) {
+      newErrors.phone = 'Phone is required';
+    } else if (!phoneRegex.test(formData.phone)) {
+      newErrors.phone = 'Phone must be 10 digits';
+    }
+
     if (!formData.empId) newErrors.empId = 'Employee ID is required';
+    if (!formData.address) newErrors.address = 'Address is required';
     if (!formData.department) newErrors.department = 'Department is required';
     if (!formData.position) newErrors.position = 'Position is required';
     if (!formData.gender) newErrors.gender = 'Gender is required';
+    if (!formData.dob) newErrors.dob = 'Date of Birth is required';
+
     return newErrors;
   };
 
@@ -168,13 +181,16 @@ const AddEmployeeForm = ({ onSave, onCancel, editingData }) => {
             {errors.empId && <p className="error">{errors.empId}</p>}
           </div>
 
-          <input
-            type="text"
-            name="address"
-            placeholder="Address"
-            value={formData.address}
-            onChange={handleInputChange}
-          />
+          <div>
+            <input
+              type="text"
+              name="address"
+              placeholder="Address"
+              value={formData.address}
+              onChange={handleInputChange}
+            />
+            {errors.address && <p className="error">{errors.address}</p>}
+          </div>
 
           <div>
             <input
@@ -220,12 +236,15 @@ const AddEmployeeForm = ({ onSave, onCancel, editingData }) => {
             {errors.gender && <p className="error">{errors.gender}</p>}
           </div>
 
-          <input
-            type="date"
-            name="dob"
-            value={formData.dob}
-            onChange={handleInputChange}
-          />
+          <div>
+            <input
+              type="date"
+              name="dob"
+              value={formData.dob}
+              onChange={handleInputChange}
+            />
+            {errors.dob && <p className="error">{errors.dob}</p>}
+          </div>
         </div>
 
         <div className="form-buttons">
