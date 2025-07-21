@@ -3,14 +3,25 @@ import {
   handleUserSignup,
   handleUserLogin,
   handleUserLogout,
-  handleAuthCheck
+  handleAuthCheck,
+  handleGetAdminDetails,
+  handleChangePassword,
+  handleUpdateAdmin
 } from '../controllers/authController';
 
-const authRoutes: express.Router = express.Router();
+import restrictToLoggedinUserOnly from '../middlewares/auth';
+import validateSignupFields from '../middlewares/validateSignupFields';
 
-authRoutes.post("/signup", handleUserSignup);
+const authRoutes = express.Router();
+
+authRoutes.post("/signup",validateSignupFields, handleUserSignup);
 authRoutes.post("/login", handleUserLogin);
 authRoutes.post("/logout", handleUserLogout);
-authRoutes.get("/check", handleAuthCheck); // NEW route
+authRoutes.get("/check", handleAuthCheck);
+
+
+authRoutes.get("/profile", restrictToLoggedinUserOnly, handleGetAdminDetails);
+authRoutes.put("/update-profile", restrictToLoggedinUserOnly, handleUpdateAdmin);
+authRoutes.put("/change-password", restrictToLoggedinUserOnly, handleChangePassword);
 
 export default authRoutes;

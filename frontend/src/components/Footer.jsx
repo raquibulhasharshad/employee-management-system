@@ -3,6 +3,8 @@ import './Footer.css';
 
 const Footer = ({ totalPages, currentPage, setCurrentPage, totalL, currentL }) => {
 
+  if (totalL === 0) return null;
+
   const chunkSize = 4;
   const currentChunkStart = Math.floor((currentPage - 1) / chunkSize) * chunkSize;
 

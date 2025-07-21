@@ -11,6 +11,27 @@ body {
   min-height: 100vh;
 }
 
+/* Layout: sidebar + main content */
+.layout {
+  display: flex;
+  flex-direction: row;
+  min-height: 100vh;
+}
+
+/* Sidebar area (already styled in Navbar.css presumably) */
+
+/* Main content area next to sidebar */
+.main-content {
+  flex: 1;
+  padding: 20px;
+  margin-top: 60px;      /* Height of navbar */
+  margin-left: 220px;     /* Width of sidebar */
+  background-color: #f2f2f2;
+  min-height: calc(100vh - 60px); /* Remaining height after navbar */
+  box-sizing: border-box;
+  overflow-x: auto;
+}
+
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -37,6 +58,11 @@ body {
     margin: 20px 0;
     padding: 0 10px;
     text-align: center;
+  }
+
+  .main-content {
+    margin-left: 0;
+    padding: 10px;
   }
 }
 

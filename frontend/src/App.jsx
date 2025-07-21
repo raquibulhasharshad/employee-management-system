@@ -86,33 +86,30 @@ const App = () => {
     setShowConfirm(true);
   };
 
-const handleDeleteSelected = () => {
-  if (selectedRows.length === 0) return;
+  const handleDeleteSelected = () => {
+    if (selectedRows.length === 0) return;
 
-  const selectedEmployees = employees.filter(emp => selectedRows.includes(emp.id));
-
-  const message =
-    selectedEmployees.length === 1
+    const selectedEmployees = employees.filter(emp => selectedRows.includes(emp.id));
+    const message = selectedEmployees.length === 1
       ? `Are you sure you want to delete ${selectedEmployees[0].name}?`
       : `Are you sure you want to delete selected employees?`;
 
-  setConfirmMessage(message);
-  setConfirmAction(() => async () => {
-    await Promise.all(
-      selectedRows.map(id =>
-        fetch(`${API_BASE_URL}/employees/${id}`, {
-          method: 'DELETE',
-          credentials: 'include',
-        })
-      )
-    );
-    setEmployees(prev => prev.filter(e => !selectedRows.includes(e.id)));
-    setSelectedRows([]);
-    setShowConfirm(false);
-  });
-  setShowConfirm(true);
-};
-
+    setConfirmMessage(message);
+    setConfirmAction(() => async () => {
+      await Promise.all(
+        selectedRows.map(id =>
+          fetch(`${API_BASE_URL}/employees/${id}`, {
+            method: 'DELETE',
+            credentials: 'include',
+          })
+        )
+      );
+      setEmployees(prev => prev.filter(e => !selectedRows.includes(e.id)));
+      setSelectedRows([]);
+      setShowConfirm(false);
+    });
+    setShowConfirm(true);
+  };
 
   const handleRowClick = index => {
     setViewEmployee(currentEmployees[index]);
@@ -123,7 +120,6 @@ const handleDeleteSelected = () => {
       const endpoint = isEdit
         ? `${API_BASE_URL}/employees/${formData.get('id')}`
         : `${API_BASE_URL}/employees`;
-
       const method = isEdit ? 'PUT' : 'POST';
 
       const res = await fetch(endpoint, {
@@ -183,38 +179,42 @@ const handleDeleteSelected = () => {
 
   return (
     <div className="app-container">
-      <Navbar
-        onAdd={handleAddNew}
-        onDelete={handleDeleteSelected}
-        onMail={handleBulkMail}
-        onLogout={handleLogout}
-        isDeleteDisabled={selectedRows.length === 0}
-        isMailDisabled={selectedRows.length === 0}
-      />
+      <div className="layout">
+        <Navbar
+          onAdd={handleAddNew}
+          onDelete={handleDeleteSelected}
+          onMail={handleBulkMail}
+          onLogout={handleLogout}
+          isDeleteDisabled={selectedRows.length === 0}
+          isMailDisabled={selectedRows.length === 0}
+        />
 
-      <Searchbar
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        onClear={() => setSearchQuery('')}
-      />
+        <div className="main-content">
+          <Searchbar
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            onClear={() => setSearchQuery('')}
+          />
 
-      <EmployeeTable
-        data={currentEmployees}
-        selectedRows={selectedRows}
-        setSelectedRows={setSelectedRows}
-        onEdit={handleEdit}
-        onDeleteSingle={handleDeleteSingle}
-        onMailSingle={handleSingleMail}
-        onRowClick={handleRowClick}
-      />
+          <EmployeeTable
+            data={currentEmployees}
+            selectedRows={selectedRows}
+            setSelectedRows={setSelectedRows}
+            onEdit={handleEdit}
+            onDeleteSingle={handleDeleteSingle}
+            onMailSingle={handleSingleMail}
+            onRowClick={handleRowClick}
+          />
 
-      <Footer
-        totalPages={totalPages}
-        currentPage={currentPage}
-        setCurrentPage={setCurrentPage}
-        totalL={filteredEmployees.length}
-        currentL={currentEmployees.length}
-      />
+          <Footer
+            totalPages={totalPages}
+            currentPage={currentPage}
+            setCurrentPage={setCurrentPage}
+            totalL={filteredEmployees.length}
+            currentL={currentEmployees.length}
+          />
+        </div>
+      </div>
 
       {showForm && (
         <div className="modal-overlay">

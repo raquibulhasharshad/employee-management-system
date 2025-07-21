@@ -1,19 +1,39 @@
-import express from "express";
-import authService from '../service/auth';
+import { Request, Response, NextFunction, RequestHandler } from "express";
+import jwt, { JwtPayload } from "jsonwebtoken";
 
-let restrictToLoggedinUserOnly = (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    const userUid = req.cookies.uid;
+const secret = "empmanagsys$123@&";
 
-    if (!userUid) return res.redirect("/login");
+const restrictToLoggedinUserOnly: RequestHandler = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const token = req.cookies?.uid;
 
-    const user = authService.getUser(userUid);
+  if (!token) {
+    res.status(401).json({ message: "Unauthorized: No token provided" });
+    return; 
+  }
 
-    if (!user) return res.redirect("/login");
+  try {
+    const decoded = jwt.verify(token, secret) as JwtPayload;
 
-    // @ts-ignore
-    req.user = user;
+    if (!decoded || typeof decoded !== "object" || !decoded.id) {
+      res.status(401).json({ message: "Unauthorized: Invalid token payload" });
+      return;
+    }
 
-    next();
+
+    (req as any).user = {
+      id: decoded.id,
+      email: decoded.email,
+      adminName: decoded.adminName,
+    };
+
+    next(); 
+  } catch (err) {
+    res.status(401).json({ message: "Unauthorized: Invalid or expired token" });
+  }
 };
 
 export default restrictToLoggedinUserOnly;

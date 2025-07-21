@@ -1,5 +1,57 @@
+/* Sidebar Styles */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 220px;
+  background-color: #0c1d4d;
+  color: white;
+  padding: 20px;
+  box-sizing: border-box;
+  z-index: 999;
+}
+
+.sidebar h2 {
+  font-size: 20px;
+  margin-bottom: 20px;
+}
+
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+}
+
+.sidebar li {
+  margin: 15px 0;
+}
+
+.sidebar a {
+  color: white;
+  text-decoration: none;
+  font-size: 16px;
+  display: block;
+  padding: 8px 10px;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.sidebar a:hover {
+  background-color: #1a2f70;
+}
+
+.sidebar a.active {
+  background-color: #3b59cf;
+  font-weight: bold;
+}
+
+/* Top navbar */
 .navbar {
-  height: 50px;
+  position: fixed;
+  top: 0;
+  left: 220px;
+  right: 0;
+  height: 60px;
   background-color: #040d5b;
   color: white;
   display: flex;
@@ -8,12 +60,13 @@
   padding: 0 20px;
   font-size: 16px;
   font-weight: 500;
-  flex-wrap: wrap;
+  z-index: 998;
+  box-sizing: border-box;
 }
 
 .navbar-left {
-  flex: 1;
   min-width: 200px;
+  font-size: 18px;
 }
 
 .navbar-right {
@@ -29,79 +82,70 @@
   flex-wrap: wrap;
 }
 
-/* Delete Button */
+/* Button Styles */
+button {
+  border: none;
+  border-radius: 4px;
+  padding: 6px 12px;
+  color: white;
+  cursor: pointer;
+  font-size: 14px;
+}
+
 button.Del {
   background-color: grey;
-  border: none;
-  color: white;
-  padding: 6px 12px;
-  border-radius: 4px;
   cursor: not-allowed;
 }
-
-button.Del.inactive {
-  visibility: hidden;
-}
-
 button.Del:enabled {
   background-color: #d9534f;
   cursor: pointer;
 }
-
 button.Del:enabled:hover {
   background-color: #c9302c;
 }
-
-/* Mail Button */
-button.Mail {
-  background-color: #0275d8;
-  border: none;
-  color: white;
-  padding: 6px 12px;
-  border-radius: 4px;
-  cursor: pointer;
+button.Del.inactive {
+  visibility: hidden;
 }
 
+button.Mail {
+  background-color: #0275d8;
+}
 button.Mail:hover {
   background-color: #025aa5;
 }
-
 button.Mail.inactive {
   background-color: grey;
   cursor: not-allowed;
   visibility: hidden;
 }
 
-/* Add Button */
 button.Add {
   background-color: #06bb3c;
-  border: none;
-  color: white;
-  padding: 6px 12px;
-  border-radius: 4px;
-  cursor: pointer;
 }
-
 button.Add:hover {
   background-color: #5cb85c;
 }
 
-/* Logout Button */
 button.Logout {
   background-color: #dc3545;
-  border: none;
-  color: white;
-  padding: 6px 12px;
-  border-radius: 4px;
-  cursor: pointer;
 }
-
 button.Logout:hover {
   background-color: #c9302c;
 }
 
+/* Responsive for mobile */
 @media (max-width: 768px) {
+  .sidebar {
+    position: relative;
+    width: 100%;
+    height: auto;
+  }
+
   .navbar {
+    position: relative;
+    top: 0;
+    left: 0;
+    width: 100%;
     flex-direction: column;
     height: auto;
     padding: 10px;
@@ -111,13 +155,16 @@ button.Logout:hover {
 
   .navbar-left,
   .navbar-right {
-    width: 100%;
     justify-content: center;
     display: flex;
     flex-wrap: wrap;
+    width: 100%;
   }
 
-  .navbar-right {
-    gap: 10px;
+  .action-buttons {
+    justify-content: center;
+    width: 100%;
   }
 }
+
+

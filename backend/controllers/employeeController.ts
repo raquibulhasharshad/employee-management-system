@@ -3,7 +3,7 @@ import path from "path";
 import fs from "fs";
 import Employee from "../model/employeeModel";
 
-// Get all employees for logged-in user
+
 const getAllEmployees = async (req: express.Request, res: express.Response): Promise<void> => {
   try {
     const userId = (req as any).user.id;
@@ -30,7 +30,7 @@ const getAllEmployees = async (req: express.Request, res: express.Response): Pro
   }
 };
 
-// Add a new employee
+
 const addEmployees = async (req: express.Request, res: express.Response): Promise<void> => {
   try {
     const userId = (req as any).user.id;
@@ -53,7 +53,7 @@ const addEmployees = async (req: express.Request, res: express.Response): Promis
   }
 };
 
-// Update employee
+
 const updateEmployees = async (req: express.Request, res: express.Response): Promise<void> => {
   try {
     const { id } = req.params;
@@ -65,7 +65,7 @@ const updateEmployees = async (req: express.Request, res: express.Response): Pro
       return;
     }
 
-    // If new image uploaded, delete old one and use new path
+
     if (req.file) {
       const newImagePath = `/uploads/${req.file.filename}`;
       const oldImagePath = path.join(__dirname, `../../${existingEmployee.image}`);
@@ -77,7 +77,7 @@ const updateEmployees = async (req: express.Request, res: express.Response): Pro
       req.body.image = newImagePath;
     }
 
-    // If frontend says to remove image
+
     if (req.body.removeImage === 'true' && existingEmployee.image) {
       const oldImagePath = path.join(__dirname, `../../${existingEmployee.image}`);
       if (fs.existsSync(oldImagePath)) {
@@ -101,7 +101,7 @@ const updateEmployees = async (req: express.Request, res: express.Response): Pro
   }
 };
 
-// Delete employee
+
 const deleteEmployees = async (req: express.Request, res: express.Response): Promise<void> => {
   try {
     const { id } = req.params;
@@ -113,7 +113,7 @@ const deleteEmployees = async (req: express.Request, res: express.Response): Pro
       return;
     }
 
-    // Delete associated image file if exists
+ 
     if (deleted.image) {
       const imagePath = path.join(__dirname, `../../${deleted.image}`);
       if (fs.existsSync(imagePath)) {

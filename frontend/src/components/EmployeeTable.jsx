@@ -81,9 +81,11 @@ const EmployeeTable = ({
               <td>{emp.email}</td>
               <td>{emp.phone}</td>
               <td onClick={(e) => e.stopPropagation()}>
-                <button className="action-btn edit" onClick={() => onEdit(index)}>✏️</button>
-                <button className="action-btn delete" onClick={() => onDeleteSingle(index)}>🗑️</button>
-                <button className="action-btn mail" onClick={() => onMailSingle(index)}>📧</button>
+                <div className="action-group">
+                  <button className="action-btn edit" onClick={() => onEdit(index)}>✏️</button>
+                  <button className="action-btn delete" onClick={() => onDeleteSingle(index)}>🗑️</button>
+                  <button className="action-btn mail" onClick={() => onMailSingle(index)}>📧</button>
+                </div>
               </td>
             </tr>
           ))}
