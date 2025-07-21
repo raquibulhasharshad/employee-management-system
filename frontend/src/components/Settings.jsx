@@ -60,10 +60,6 @@ const Settings = () => {
       }
     }
 
-    if (!admin.address) {
-      newErrors.address = "Address is required";
-    }
-
     setErrors(newErrors);
 
     if (Object.keys(newErrors).length > 0) return;
