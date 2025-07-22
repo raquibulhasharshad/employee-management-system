@@ -1,16 +1,19 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import './Navbar.css';
+import DeleteAccountModal from './DeleteAccountModal';
 
 const Navbar = ({
   isDeleteDisabled = true,
   isMailDisabled = true,
   onDelete = () => {},
   onAdd = () => {},
-  onMail = () => {}
+  onMail = () => {},
 }) => {
   const location = useLocation();
   const navigate = useNavigate();
+
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const getTitle = () => {
     if (location.pathname.startsWith('/dashboard/settings')) return 'Settings';
@@ -37,6 +40,28 @@ const Navbar = ({
     }
   };
 
+  const handleDeleteAccount = async (email, password) => {
+    try {
+      const res = await fetch('http://localhost:5000/api/auth/delete-account', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (res.ok) {
+        alert('Account and all associated data deleted.');
+        navigate('/');
+      } else {
+        const data = await res.json();
+        alert(data.message || 'Failed to delete account');
+      }
+    } catch (err) {
+      console.error('Error deleting account:', err);
+      alert('Something went wrong while deleting the account.');
+    }
+  };
+
   return (
     <>
       <aside className="sidebar">
@@ -45,9 +70,7 @@ const Navbar = ({
           <li>
             <NavLink
               to="/dashboard"
-              className={() =>
-                location.pathname === '/dashboard' ? 'active' : ''
-              }
+              className={() => (location.pathname === '/dashboard' ? 'active' : '')}
             >
               Dashboard
             </NavLink>
@@ -119,11 +142,25 @@ const Navbar = ({
               </button>
             </div>
           )}
+
+          {location.pathname.startsWith('/dashboard/settings') && (
+            <button className="DeleteAccount" onClick={() => setShowDeleteModal(true)}>
+              🗑️ Delete Account
+            </button>
+          )}
+
           <button className="Logout" onClick={handleLogout}>
             🚪 Logout
           </button>
         </div>
       </nav>
+
+      {showDeleteModal && (
+        <DeleteAccountModal
+          onClose={() => setShowDeleteModal(false)}
+          onConfirm={handleDeleteAccount}
+        />
+      )}
     </>
   );
 };

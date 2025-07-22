@@ -6,7 +6,8 @@ import {
   handleAuthCheck,
   handleGetAdminDetails,
   handleChangePassword,
-  handleUpdateAdmin
+  handleUpdateAdmin,
+  handleDeleteAccount
 } from '../controllers/authController';
 
 import restrictToLoggedinUserOnly from '../middlewares/auth';
@@ -23,5 +24,6 @@ authRoutes.get("/check", handleAuthCheck);
 authRoutes.get("/profile", restrictToLoggedinUserOnly, handleGetAdminDetails);
 authRoutes.put("/update-profile", restrictToLoggedinUserOnly, handleUpdateAdmin);
 authRoutes.put("/change-password", restrictToLoggedinUserOnly, handleChangePassword);
+authRoutes.delete("/delete-account", restrictToLoggedinUserOnly,handleDeleteAccount);
 
 export default authRoutes;

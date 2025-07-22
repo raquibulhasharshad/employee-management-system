@@ -2,6 +2,7 @@ import express from 'express';
 import User from '../model/userModel';
 import authService from '../service/auth';
 import bcrypt from 'bcrypt';
+import Employee from '../model/employeeModel';
 
 const handleUserSignup = async (req: express.Request, res: express.Response): Promise<void> => {
   try {
@@ -145,6 +146,41 @@ const handleChangePassword = async (req: express.Request, res: express.Response)
   }
 };
 
+
+const handleDeleteAccount = async (req: express.Request, res: express.Response): Promise<void> => {
+  try {
+    const userId = (req as any).user.id;
+    const { email, password } = req.body;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      res.status(404).json({ message: "User not found" });
+      return;
+    }
+
+    if (user.email !== email) {
+      res.status(400).json({ message: "Incorrect email" });
+      return;
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      res.status(400).json({ message: "Incorrect password" });
+      return;
+    }
+
+    await Employee.deleteMany({ createdBy: user._id.toString() });
+    await User.findByIdAndDelete(userId);
+    res.clearCookie("uid");
+
+    res.status(200).json({ message: "Account and all associated data deleted" });
+  } catch (error) {
+    console.error("Error deleting account", error);
+    res.status(500).json({ message: "Something went wrong" });
+  }
+};
+
+
 const handleAuthCheck = (req: express.Request, res: express.Response): void => {
   try {
     const token = req.cookies?.uid;
@@ -175,4 +211,5 @@ export {
   handleGetAdminDetails,
   handleUpdateAdmin,
   handleChangePassword,
+  handleDeleteAccount
 };

@@ -167,4 +167,11 @@ button.Logout:hover {
   }
 }
 
+button.DeleteAccount {
+  background-color: #6c757d;
+  color: white;
+}
+button.DeleteAccount:hover {
+  background-color: #5a6268;
+}
 

@@ -1,0 +1,122 @@
+.delete-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.delete-modal {
+  background: #ffffff;
+  padding: 2rem 1.8rem;
+  border-radius: 14px;
+  width: 90%;
+  max-width: 430px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+  animation: fadeIn 0.3s ease;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.delete-modal h3 {
+  color: #d60000;
+  font-size: 1.6rem;
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+
+.delete-modal .warning {
+  font-size: 0.96rem;
+  color: #b20000;
+  margin-bottom: 1.4rem;
+  text-align: center;
+}
+
+.delete-modal input {
+  width: 100%;
+  margin-bottom: 1rem;
+  padding: 0.6rem 0.85rem;
+  font-size: 1rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.delete-modal input:focus {
+  border-color: #007bff;
+}
+
+.error {
+  color: red;
+  font-size: 0.85rem;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+
+.modal-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1.8rem;
+  gap: 1rem;
+}
+
+
+.cancel-btn,
+.confirm-btn {
+  padding: 0.55rem 1.4rem;
+  font-size: 0.95rem;
+  border-radius: 6px;
+  cursor: pointer;
+  border: none;
+  transition: background 0.2s ease;
+  min-width: 110px;
+}
+
+.confirm-btn {
+  background: #d60000;
+  color: white;
+}
+
+.confirm-btn:hover {
+  background: #b00000;
+}
+
+.cancel-btn {
+  background: #ccc;
+  color: #333;
+}
+
+.cancel-btn:hover {
+  background: #aaa;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+@media (max-width: 500px) {
+  .modal-actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .cancel-btn,
+  .confirm-btn {
+    width: 100%;
+  }
+}
