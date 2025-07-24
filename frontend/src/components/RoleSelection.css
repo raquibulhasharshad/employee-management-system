@@ -1,0 +1,32 @@
+.role-selection-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 100px;
+  font-family: Arial, sans-serif;
+}
+
+.role-selection-container h2 {
+  margin-bottom: 30px;
+}
+
+.role-buttons {
+  display: flex;
+  gap: 30px;
+}
+
+.role-buttons button {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: bold;
+  background-color: #007bff;
+  color: white;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.role-buttons button:hover {
+  background-color: #0056b3;
+}

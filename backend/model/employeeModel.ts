@@ -12,7 +12,8 @@ const employeeSchema = new Schema({
   gender: { type: String },
   skills: { type: String },
   dob: { type: String },
-  createdBy: { type: String, required: true }
+  createdBy: { type: String, required: true },
+  password:{type:String, required:true}
 });
 
 const Employee = model("Employee", employeeSchema);

@@ -1,28 +1,29 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
-import App from './App'; // Employees dashboard
-import Login from './components/Login';
-import Signup from './components/Signup';
+import App from './App'; // Admin - Manage Employees
+import Login from './components/Login'; // Admin Login
+import Signup from './components/Signup'; // Admin Signup
 import ProtectedRoute from './components/ProtectedRoute';
+import EmployeeProtectedRoute from './components/EmployeeProtectedRoute';
+
 import Dashboard from './components/Dashboard';
 import Navbar from './components/Navbar';
 import Settings from './components/Settings';
 import ChangePassword from './components/ChangePassword';
 
+import EmployeeLogin from './components/EmployeeLogin';
+import EmployeeNavbar from './components/EmployeeNavbar';
+import EmployeeDashboard from './components/EmployeeDashboard';
+import EmployeeSettings from './components/EmployeeSettings';
+import RoleSelection from './components/RoleSelection';
+
 import './index.css';
-
-
-const Leave = () => <div className="page-wrapper"><h2>Leave Management</h2></div>;
-const Salary = () => <div className="page-wrapper"><h2>Salary Management</h2></div>;
-
-const isLoggedIn = () => document.cookie.includes('uid=');
-
 
 const AppWithNavbar = ({ children }) => {
   const handleLogout = async () => {
-    await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'}/auth/logout`, {
+    await fetch('http://localhost:5000/api/auth/logout', {
       method: 'POST',
       credentials: 'include',
     });
@@ -32,9 +33,24 @@ const AppWithNavbar = ({ children }) => {
   return (
     <div className="app-container">
       <Navbar onLogout={handleLogout} />
-      <main className="main-content-wrapper">
-        {children}
-      </main>
+      <main className="main-content-wrapper">{children}</main>
+    </div>
+  );
+};
+
+const EmployeeWithNavbar = ({ children }) => {
+  const handleLogout = async () => {
+    await fetch('http://localhost:5000/api/auth/employee/logout', {
+      method: 'POST',
+      credentials: 'include',
+    });
+    window.location.href = '/';
+  };
+
+  return (
+    <div className="app-container">
+      <EmployeeNavbar onLogout={handleLogout} />
+      <main className="main-content-wrapper">{children}</main>
     </div>
   );
 };
@@ -43,14 +59,13 @@ createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <BrowserRouter>
       <Routes>
-        {/* Public Routes */}
-        <Route
-          path="/"
-          element={isLoggedIn() ? <Navigate to="/dashboard" replace /> : <Login />}
-        />
+        {/* Role selection homepage */}
+        <Route path="/" element={<RoleSelection />} />
+
+        {/* Admin routes */}
+        <Route path="/admin/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
 
-        {/* Protected Routes */}
         <Route
           path="/dashboard"
           element={
@@ -67,26 +82,6 @@ createRoot(document.getElementById('root')).render(
             <ProtectedRoute>
               <AppWithNavbar>
                 <App />
-              </AppWithNavbar>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/dashboard/leave"
-          element={
-            <ProtectedRoute>
-              <AppWithNavbar>
-                <Leave />
-              </AppWithNavbar>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/dashboard/salary"
-          element={
-            <ProtectedRoute>
-              <AppWithNavbar>
-                <Salary />
               </AppWithNavbar>
             </ProtectedRoute>
           }
@@ -109,6 +104,29 @@ createRoot(document.getElementById('root')).render(
                 <ChangePassword />
               </AppWithNavbar>
             </ProtectedRoute>
+          }
+        />
+
+        {/* Employee routes */}
+        <Route path="/employee/login" element={<EmployeeLogin />} />
+        <Route
+          path="/employee/dashboard"
+          element={
+            <EmployeeProtectedRoute>
+              <EmployeeWithNavbar>
+                <EmployeeDashboard />
+              </EmployeeWithNavbar>
+            </EmployeeProtectedRoute>
+          }
+        />
+        <Route
+          path="/employee/settings"
+          element={
+            <EmployeeProtectedRoute>
+              <EmployeeWithNavbar>
+                <EmployeeSettings />
+              </EmployeeWithNavbar>
+            </EmployeeProtectedRoute>
           }
         />
       </Routes>

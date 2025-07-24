@@ -1,9 +1,11 @@
 import express from "express";
 import path from "path";
 import fs from "fs";
+import bcrypt from "bcrypt";
 import Employee from "../model/employeeModel";
+import User from "../model/userModel";
 
-
+// GET all employees
 const getAllEmployees = async (req: express.Request, res: express.Response): Promise<void> => {
   try {
     const userId = (req as any).user.id;
@@ -21,7 +23,7 @@ const getAllEmployees = async (req: express.Request, res: express.Response): Pro
       position: emp.position,
       gender: emp.gender,
       skills: emp.skills,
-      dob: emp.dob
+      dob: emp.dob,
     }));
 
     res.status(200).json(formatted);
@@ -30,30 +32,85 @@ const getAllEmployees = async (req: express.Request, res: express.Response): Pro
   }
 };
 
-
+// ADD employee
 const addEmployees = async (req: express.Request, res: express.Response): Promise<void> => {
   try {
     const userId = (req as any).user.id;
     const imagePath = req.file ? `/uploads/${req.file.filename}` : '';
 
+    const {
+      name,
+      empId,
+      email,
+      phone,
+      address,
+      department,
+      position,
+      gender,
+      skills,
+      dob
+    } = req.body;
+
+    // Check for duplicate email or empId for the same admin
+    const duplicate = await Employee.findOne({
+      createdBy: userId,
+      $or: [{ email }, { empId }]
+    });
+
+    if (duplicate) {
+      res.status(400).json({ message: "Employee with same email or ID already exists" });
+      return;
+    }
+
+    // Get admin name for password logic
+    const admin = await User.findById(userId);
+    if (!admin) {
+      res.status(404).json({ message: "Admin not found" });
+      return;
+    }
+
+    const adminNameFormatted = admin.adminName.replace(/\s+/g, "").toLowerCase();
+    const rawPassword = `${adminNameFormatted}${phone}${empId}`;
+    const hashedPassword = await bcrypt.hash(rawPassword, 10);
+
     const newEmployee = new Employee({
-      ...req.body,
+      name,
+      empId,
+      email,
+      phone,
+      address,
+      department,
+      position,
+      gender,
+      skills,
+      dob,
       image: imagePath,
-      createdBy: userId
+      createdBy: userId,
+      password: hashedPassword,
     });
 
     await newEmployee.save();
 
     res.status(201).json({
       id: newEmployee._id,
-      ...newEmployee.toObject()
+      name: newEmployee.name,
+      empId: newEmployee.empId,
+      email: newEmployee.email,
+      phone: newEmployee.phone,
+      address: newEmployee.address,
+      department: newEmployee.department,
+      position: newEmployee.position,
+      gender: newEmployee.gender,
+      skills: newEmployee.skills,
+      dob: newEmployee.dob,
+      image: newEmployee.image
     });
   } catch (error) {
     res.status(500).json({ message: "Failed to add employee", error });
   }
 };
 
-
+// UPDATE employee
 const updateEmployees = async (req: express.Request, res: express.Response): Promise<void> => {
   try {
     const { id } = req.params;
@@ -65,7 +122,6 @@ const updateEmployees = async (req: express.Request, res: express.Response): Pro
       return;
     }
 
-
     if (req.file) {
       const newImagePath = `/uploads/${req.file.filename}`;
       const oldImagePath = path.join(__dirname, `../../${existingEmployee.image}`);
@@ -76,7 +132,6 @@ const updateEmployees = async (req: express.Request, res: express.Response): Pro
 
       req.body.image = newImagePath;
     }
-
 
     if (req.body.removeImage === 'true' && existingEmployee.image) {
       const oldImagePath = path.join(__dirname, `../../${existingEmployee.image}`);
@@ -101,7 +156,7 @@ const updateEmployees = async (req: express.Request, res: express.Response): Pro
   }
 };
 
-
+// DELETE employee
 const deleteEmployees = async (req: express.Request, res: express.Response): Promise<void> => {
   try {
     const { id } = req.params;
@@ -113,7 +168,6 @@ const deleteEmployees = async (req: express.Request, res: express.Response): Pro
       return;
     }
 
- 
     if (deleted.image) {
       const imagePath = path.join(__dirname, `../../${deleted.image}`);
       if (fs.existsSync(imagePath)) {
