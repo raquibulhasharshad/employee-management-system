@@ -10,6 +10,9 @@ const EmployeeNavbar = () => {
   const getTitle = () => {
     if (location.pathname.includes('/employee/settings')) return 'Settings';
     if (location.pathname.includes('/employee/dashboard')) return 'Dashboard';
+    if (location.pathname.includes('/employee/profile')) return 'My Profile';
+    if (location.pathname.includes('/employee/leave')) return 'Leave';
+    if (location.pathname.includes('/employee/salary')) return 'Salary';
     return 'Employee Panel';
   };
 
@@ -39,6 +42,21 @@ const EmployeeNavbar = () => {
           <li>
             <NavLink to="/employee/dashboard" className={({ isActive }) => isActive ? 'active' : ''}>
               Dashboard
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="/employee/profile" className={({ isActive }) => isActive ? 'active' : ''}>
+              My Profile
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="/employee/leave" className={({ isActive }) => isActive ? 'active' : ''}>
+              Leave
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="/employee/salary" className={({ isActive }) => isActive ? 'active' : ''}>
+              Salary
             </NavLink>
           </li>
           <li>

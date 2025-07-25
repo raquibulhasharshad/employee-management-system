@@ -17,6 +17,7 @@ import EmployeeLogin from './components/EmployeeLogin';
 import EmployeeNavbar from './components/EmployeeNavbar';
 import EmployeeDashboard from './components/EmployeeDashboard';
 import EmployeeSettings from './components/EmployeeSettings';
+import MyProfile from './components/MyProfile'; // ✅ Imported MyProfile
 import RoleSelection from './components/RoleSelection';
 
 import './index.css';
@@ -125,6 +126,16 @@ createRoot(document.getElementById('root')).render(
             <EmployeeProtectedRoute>
               <EmployeeWithNavbar>
                 <EmployeeSettings />
+              </EmployeeWithNavbar>
+            </EmployeeProtectedRoute>
+          }
+        />
+        <Route
+          path="/employee/profile" // ✅ MyProfile route
+          element={
+            <EmployeeProtectedRoute>
+              <EmployeeWithNavbar>
+                <MyProfile />
               </EmployeeWithNavbar>
             </EmployeeProtectedRoute>
           }

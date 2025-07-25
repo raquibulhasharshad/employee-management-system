@@ -99,13 +99,6 @@ const EmployeeSettings = () => {
 
           <div className="settings-buttons">
             <button type="submit" className="save-btn">Update Password</button>
-            <button
-              type="button"
-              className="edit-btn"
-              onClick={() => navigate("/dashboard/settings")}
-            >
-              Back to Profile
-            </button>
           </div>
         </form>
       </div>

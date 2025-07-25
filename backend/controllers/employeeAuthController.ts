@@ -3,6 +3,7 @@ import Employee from "../model/employeeModel";
 import bcrypt from "bcrypt";
 import employeeAuthService from "../service/employeeAuthService";
 
+
 const handleEmployeeLogin = async (req: express.Request, res: express.Response): Promise<void> => {
   try {
     const { email, password } = req.body;
@@ -94,9 +95,27 @@ const handleEmployeeChangePassword = async (req: express.Request, res: express.R
   }
 };
 
+
+const handleGetEmployeeDetails = async (req: express.Request, res: express.Response): Promise<void> => {
+  try {
+    const userId = (req as any).user.id;
+    const employee = await Employee.findById(userId).select("-password");
+
+    if (!employee) {
+      res.status(404).json({ message: "Employee not found" });
+      return;
+    }
+
+    res.status(200).json(employee);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch Employee details", error });
+  }
+};
+
 export {
   handleEmployeeLogin,
   handleEmployeeLogout,
   handleEmployeeAuthCheck,
-  handleEmployeeChangePassword
+  handleEmployeeChangePassword,
+  handleGetEmployeeDetails
 };
