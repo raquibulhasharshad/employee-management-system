@@ -51,16 +51,23 @@ const addEmployees = async (req: express.Request, res: express.Response): Promis
       dob
     } = req.body;
 
-    // Check for duplicate email or empId for the same admin
-    const duplicate = await Employee.findOne({
-      createdBy: userId,
-      $or: [{ email }, { empId }]
-    });
-
-    if (duplicate) {
-      res.status(400).json({ message: "Employee with same email or ID already exists" });
+    const existingEmail= await Employee.findOne({email});
+    if(existingEmail){
+      if(existingEmail.createdBy.toString()===userId){
+        res.status(400).json({message:"Employee Email ID already exists for this company"})
+      }else{
+        res.status(400).json({message:"Employee Email ID already exists for another company"})
+      }
       return;
     }
+
+    const existingEmpId= await Employee.findOne({empId, createdBy:userId})
+    if(existingEmpId){
+      res.status(400).json({message:"Employee Id already exists for this admin"})
+      return;
+    }
+
+
 
     // Get admin name for password logic
     const admin = await User.findById(userId);
@@ -121,6 +128,30 @@ const updateEmployees = async (req: express.Request, res: express.Response): Pro
       res.status(404).json({ message: "Employee not found" });
       return;
     }
+
+    const {email, empId}=req.body
+    if(email){
+      const emailConflict= await Employee.findOne({email});
+      if(emailConflict && emailConflict._id.toString()!==id){
+        if(emailConflict.createdBy.toString()===userId){
+          res.status(400).json({message:"Employee email Id already exists for this company"});
+        }else{
+          res.status(400).json({message:"Employee email Id already exists for another company"});
+        }
+        return;
+      }
+    }
+
+
+    if (empId) {
+      const empIdConflict = await Employee.findOne({ empId, createdBy: userId });
+      if (empIdConflict && empIdConflict._id.toString() !== id) {
+        res.status(400).json({ message: "Employee ID already exists for this company" });
+        return;
+      }
+    }
+
+
 
     if (req.file) {
       const newImagePath = `/uploads/${req.file.filename}`;

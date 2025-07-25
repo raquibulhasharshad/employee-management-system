@@ -15,11 +15,26 @@ const AddEmployeeForm = ({ onSave, onCancel, editingData }) => {
     gender: '',
     dob: '',
     image: null,
-    removeImage: false
+    removeImage: false,
   });
 
   const [previewUrl, setPreviewUrl] = useState('');
   const [errors, setErrors] = useState({});
+  const [existingEmployees, setExistingEmployees] = useState([]);
+
+  useEffect(() => {
+    const fetchExisting = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/employees`, { credentials: 'include' });
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        setExistingEmployees(data);
+      } catch (err) {
+        console.error('Failed to fetch existing employees:', err);
+      }
+    };
+    fetchExisting();
+  }, []);
 
   useEffect(() => {
     if (editingData) {
@@ -83,6 +98,28 @@ const AddEmployeeForm = ({ onSave, onCancel, editingData }) => {
     if (!formData.position) newErrors.position = 'Position is required';
     if (!formData.gender) newErrors.gender = 'Gender is required';
     if (!formData.dob) newErrors.dob = 'Date of Birth is required';
+
+    // Custom validation
+    const emailConflict = existingEmployees.find(emp =>
+      emp.email === formData.email &&
+      emp.id !== editingData?.id
+    );
+
+    if (emailConflict) {
+      newErrors.email = (emailConflict.admin === editingData?.admin)
+        ? 'Employee email ID already exists for this admin'
+        : 'Email ID already exists for some other company';
+    }
+
+    const empIdConflict = existingEmployees.find(emp =>
+      emp.empId === formData.empId &&
+      emp.admin === editingData?.admin &&
+      emp.id !== editingData?.id
+    );
+
+    if (empIdConflict) {
+      newErrors.empId = 'Employee ID already exists for this admin';
+    }
 
     return newErrors;
   };
