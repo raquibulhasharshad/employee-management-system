@@ -129,6 +129,12 @@ const updateLeaveStatus = async (req: express.Request, res: express.Response): P
       return;
     }
 
+    // ✅ Prevent status change if already Approved or Rejected
+    if (leave.status === "Approved" || leave.status === "Rejected") {
+      res.status(400).json({ success: false, message: `Leave is already ${leave.status} and cannot be changed.` });
+      return;
+    }
+
     leave.status = status;
     await leave.save();
 
@@ -137,6 +143,7 @@ const updateLeaveStatus = async (req: express.Request, res: express.Response): P
     res.status(500).json({ success: false, message: "Error updating leave status" });
   }
 };
+
 
 
 export {

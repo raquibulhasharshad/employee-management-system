@@ -158,3 +158,23 @@
     width: 100%;
   }
 }
+
+.modal-actions button:disabled {
+  cursor: not-allowed; /* 🚫 cursor */
+  opacity: 0.6;
+}
+
+.status-note {
+  margin-top: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.status-note.Approved {
+  color: #28a745; /* green */
+}
+
+.status-note.Rejected {
+  color: #dc3545; /* red */
+}

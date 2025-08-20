@@ -9,6 +9,16 @@ const EmployeeLeaveDetailsModal = ({ leave, onClose }) => {
     return isNaN(d) ? 'Invalid Date' : d.toLocaleDateString();
   };
 
+  const calculateDays = (from, to) => {
+    if (!from || !to) return '—';
+    const start = new Date(from);
+    const end = new Date(to);
+    if (isNaN(start) || isNaN(end)) return '—';
+    // +1 so inclusive of both start & end dates
+    const diff = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
+    return diff > 0 ? diff : '—';
+  };
+
   return (
     <div className="emp-modal-overlay" onClick={onClose}>
       <div className="emp-modal-box" onClick={(e) => e.stopPropagation()}>
@@ -18,6 +28,7 @@ const EmployeeLeaveDetailsModal = ({ leave, onClose }) => {
           <p><strong>Leave Type:</strong> <span className="highlight">{leave.leaveType}</span></p>
           <p><strong>From:</strong> {formatDate(leave.fromDate)}</p>
           <p><strong>To:</strong> {formatDate(leave.toDate)}</p>
+          <p><strong>Days:</strong> {calculateDays(leave.fromDate, leave.toDate)}</p>
           <p><strong>Applied On:</strong> {formatDate(leave.appliedAt)}</p>
           <p><strong>Status:</strong> <span className={`status-${leave.status.toLowerCase()}`}>{leave.status}</span></p>
         </div>

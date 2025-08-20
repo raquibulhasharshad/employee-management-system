@@ -35,7 +35,18 @@ const LeaveDetailsModal = ({ leave, onClose, onStatusChange }) => {
   const formatDate = (date) => {
     if (!date) return 'N/A';
     const d = new Date(date);
-    return isNaN(d) ? 'Invalid Date' : `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
+    return isNaN(d)
+      ? 'Invalid Date'
+      : `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
+  };
+
+  const calculateDays = (from, to) => {
+    if (!from || !to) return 'N/A';
+    const start = new Date(from);
+    const end = new Date(to);
+    if (isNaN(start) || isNaN(end)) return 'N/A';
+    const diff = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1; // inclusive
+    return diff > 0 ? diff : 'N/A';
   };
 
   const employee = leave.employee || {};
@@ -44,10 +55,16 @@ const LeaveDetailsModal = ({ leave, onClose, onStatusChange }) => {
   const department = leave.department || employee.department || 'N/A';
   const leaveType = leave.leaveType || 'N/A';
   const reason = leave.description || leave.reason || 'N/A';
-  const startDate = formatDate(leave.startDate || leave.fromDate);
-  const endDate = formatDate(leave.endDate || leave.toDate);
+  const startRaw = leave.startDate || leave.fromDate;
+  const endRaw = leave.endDate || leave.toDate;
+  const startDate = formatDate(startRaw);
+  const endDate = formatDate(endRaw);
   const appliedOn = formatDate(leave.appliedAt);
+  const days = calculateDays(startRaw, endRaw);
   const image = getImageUrl(leave.image || employee.image);
+
+  // ✅ check if leave status is already finalized
+  const isFinalized = leave.status === 'Approved' || leave.status === 'Rejected';
 
   return (
     <div className="modal-overlay">
@@ -67,7 +84,9 @@ const LeaveDetailsModal = ({ leave, onClose, onStatusChange }) => {
           <p><strong>Leave Type:</strong> {leaveType}</p>
           <p><strong>From:</strong> {startDate}</p>
           <p><strong>To:</strong> {endDate}</p>
+          <p><strong>Days:</strong> {days}</p>
           <p><strong>Applied On:</strong> {appliedOn}</p>
+          <p><strong>Status:</strong> {leave.status}</p>
         </div>
 
         <div className="modal-description">
@@ -76,10 +95,29 @@ const LeaveDetailsModal = ({ leave, onClose, onStatusChange }) => {
         </div>
 
         <div className="modal-actions">
-          <button className="Approve" onClick={() => handleAction('Approved')}>Approve</button>
-          <button className="Reject" onClick={() => handleAction('Rejected')}>Reject</button>
+          <button
+            className="Approve"
+            disabled={isFinalized}
+            onClick={() => handleAction('Approved')}
+          >
+            Approve
+          </button>
+          <button
+            className="Reject"
+            disabled={isFinalized}
+            onClick={() => handleAction('Rejected')}
+          >
+            Reject
+          </button>
           <button className="Close" onClick={onClose}>Close</button>
         </div>
+
+        {/* ✅ Show message if already approved/rejected */}
+        {isFinalized && (
+          <p className={`status-note ${leave.status}`}>
+            This leave has already been {leave.status}.
+          </p>
+        )}
       </div>
     </div>
   );
