@@ -1,41 +1,38 @@
 import React from 'react';
 import './Footer.css';
 
-const Footer = ({ totalPages, currentPage, setCurrentPage, totalL, currentL }) => {
-
+const Footer = ({
+  totalPages,
+  currentPage,
+  setCurrentPage,
+  totalL,
+  currentL,
+  footerClass = ''
+}) => {
   if (totalL === 0) return null;
 
   const chunkSize = 4;
   const currentChunkStart = Math.floor((currentPage - 1) / chunkSize) * chunkSize;
-
-
   const pages = Array.from(
     { length: Math.min(chunkSize, totalPages - currentChunkStart) },
     (_, i) => currentChunkStart + i + 1
   );
 
   return (
-    <div className="table-footer">
+    <div className={`table-footer ${footerClass}`}>
       <div className="entry-count">
         Showing {currentL} out of {totalL} entries
       </div>
-
       <div className="pagination">
-
-        <button
-          onClick={() => setCurrentPage(currentPage - 1)}
-          disabled={currentPage === 1}
-        >
+        <button onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage === 1}>
           Previous
         </button>
 
         {currentChunkStart > 0 && (
-          <button onClick={() => setCurrentPage(currentChunkStart)}>
-            ...
-          </button>
+          <button onClick={() => setCurrentPage(currentChunkStart)}>...</button>
         )}
 
-        {pages.map(page => (
+        {pages.map((page) => (
           <button
             key={page}
             onClick={() => setCurrentPage(page)}
@@ -47,9 +44,7 @@ const Footer = ({ totalPages, currentPage, setCurrentPage, totalL, currentL }) =
 
         {currentChunkStart + chunkSize < totalPages && (
           <button
-            onClick={() =>
-              setCurrentPage(Math.min(currentChunkStart + chunkSize + 1, totalPages))
-            }
+            onClick={() => setCurrentPage(Math.min(currentChunkStart + chunkSize + 1, totalPages))}
           >
             ...
           </button>
@@ -61,7 +56,6 @@ const Footer = ({ totalPages, currentPage, setCurrentPage, totalL, currentL }) =
         >
           Next
         </button>
-
       </div>
     </div>
   );

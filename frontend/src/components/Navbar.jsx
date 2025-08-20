@@ -9,10 +9,11 @@ const Navbar = ({
   onDelete = () => {},
   onAdd = () => {},
   onMail = () => {},
+  onStatusChange = () => {},
+  statusFilter = 'All',
 }) => {
   const location = useLocation();
   const navigate = useNavigate();
-
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const getTitle = () => {
@@ -121,6 +122,7 @@ const Navbar = ({
       <nav className="navbar">
         <div className="navbar-left">{getTitle()}</div>
         <div className="navbar-right">
+
           {location.pathname.startsWith('/dashboard/employees') && (
             <div className="action-buttons">
               <button
@@ -139,6 +141,35 @@ const Navbar = ({
               </button>
               <button className="Add" onClick={onAdd}>
                 ➕ Add New Employee
+              </button>
+            </div>
+          )}
+
+          {location.pathname.startsWith('/dashboard/leave') && (
+            <div className="leave-filters">
+              <button
+                className={statusFilter === 'Pending' ? 'active' : ''}
+                onClick={() => onStatusChange('Pending')}
+              >
+                Pending
+              </button>
+              <button
+                className={statusFilter === 'Approved' ? 'active' : ''}
+                onClick={() => onStatusChange('Approved')}
+              >
+                Approved
+              </button>
+              <button
+                className={statusFilter === 'Rejected' ? 'active' : ''}
+                onClick={() => onStatusChange('Rejected')}
+              >
+                Rejected
+              </button>
+              <button
+                className={statusFilter === 'All' ? 'active' : ''}
+                onClick={() => onStatusChange('All')}
+              >
+                All
               </button>
             </div>
           )}

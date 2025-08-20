@@ -1,0 +1,88 @@
+.admin-leave-page {
+  padding: 60px 20px 30px 20px; /* Move page content down */
+  font-family: sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Center navbar and table */
+}
+
+.leave-navbar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.leave-navbar button {
+  padding: 8px 12px;
+  border: 1px solid #007bff;
+  background-color: white;
+  color: #007bff;
+  border-radius: 5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.leave-navbar button:hover {
+  background-color: #007bff;
+  color: white;
+}
+
+.leave-navbar .active {
+  background-color: #007bff;
+  color: white;
+}
+
+.admin-leave-table-container {
+  width: 100%;
+  max-width: 1000px;       /* Set max width */
+  overflow-x: auto;
+  margin-left: 200px;
+}
+
+.admin-leave-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
+  border-radius: 6px;
+}
+
+.admin-leave-table th {
+  background-color: #f0f0f0;
+  font-weight: 600;
+  padding: 10px;
+  text-align: center;
+  border-bottom: 2px solid #ddd;
+}
+
+.admin-leave-table td {
+  padding: 10px;
+  text-align: center;
+  border-bottom: 1px solid #eee;
+}
+
+.admin-leave-table tbody tr:hover {
+  background-color: #f9f9f9;
+  cursor: pointer;
+}
+
+.admin-leave-img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.no-leaves {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+  background-color: #fff;
+  border-radius: 6px;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.05);
+  margin: 10px auto;
+  max-width: 94%;
+}

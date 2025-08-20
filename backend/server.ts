@@ -7,6 +7,7 @@ import cookieParser from 'cookie-parser';
 import employeeRoutes from './routes/employeeRoutes';
 import authRoutes from './routes/authRoutes';
 import employeeAuthRoutes from './routes/employeeAuthRoutes';
+import leaveRoutes from './routes/leaveRoutes';
 
 const app: express.Application = express();
 const hostname = '127.0.0.1';
@@ -30,6 +31,7 @@ app.use(cookieParser());
 app.use('/api', employeeRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/employee/auth', employeeAuthRoutes);
+app.use('/api/leave', leaveRoutes);
 
 mongoose.connect('mongodb://127.0.0.1:27017/employeedb')
   .then(() => console.log('MongoDB connected'))

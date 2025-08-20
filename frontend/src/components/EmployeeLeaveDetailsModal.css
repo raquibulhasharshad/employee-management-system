@@ -1,0 +1,89 @@
+.emp-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.55); /* softer, less opaque */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.emp-modal-box {
+  background: #fff;
+  padding: 24px 28px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 500px;
+  animation: modalFadeIn 0.25s ease-out;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+  font-family: Arial, sans-serif;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.emp-modal-info p {
+  margin: 6px 0;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.highlight {
+  font-weight: bold;
+  color: #007bff;
+}
+
+.status-approved {
+  color: #28a745;
+  font-weight: bold;
+}
+
+.status-rejected {
+  color: #dc3545;
+  font-weight: bold;
+}
+
+.status-pending {
+  color: #ff9800;
+  font-weight: bold;
+}
+
+.emp-modal-description {
+  margin-top: 14px;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.emp-modal-actions {
+  text-align: right;
+  margin-top: 18px;
+}
+
+.emp-modal-actions button {
+  padding: 8px 16px;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.2s ease-in-out;
+}
+
+.emp-modal-actions button:hover {
+  background: #0056b3;
+}

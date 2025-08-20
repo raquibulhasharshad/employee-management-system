@@ -3,7 +3,7 @@ import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import './Navbar.css';
 import { API_BASE_URL } from '../constants';
 
-const EmployeeNavbar = () => {
+const EmployeeNavbar = ({ onAddLeave = () => {} }) => {
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -69,7 +69,13 @@ const EmployeeNavbar = () => {
 
       <div className="navbar">
         <div className="navbar-left">{getTitle()}</div>
+
         <div className="navbar-right">
+          {location.pathname === '/employee/leave' && (
+            <button className="Add" onClick={onAddLeave}>
+              Add Leave
+            </button>
+          )}
           <button className="Logout" onClick={handleLogout}>Logout</button>
         </div>
       </div>
