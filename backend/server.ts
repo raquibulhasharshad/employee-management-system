@@ -8,6 +8,7 @@ import employeeRoutes from './routes/employeeRoutes';
 import authRoutes from './routes/authRoutes';
 import employeeAuthRoutes from './routes/employeeAuthRoutes';
 import leaveRoutes from './routes/leaveRoutes';
+import salaryRoutes from './routes/salaryRoutes';
 
 const app: express.Application = express();
 const hostname = '127.0.0.1';
@@ -32,6 +33,7 @@ app.use('/api', employeeRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/employee/auth', employeeAuthRoutes);
 app.use('/api/leave', leaveRoutes);
+app.use("/api/salary", salaryRoutes);
 
 mongoose.connect('mongodb://127.0.0.1:27017/employeedb')
   .then(() => console.log('MongoDB connected'))
