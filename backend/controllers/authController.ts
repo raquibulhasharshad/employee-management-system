@@ -3,6 +3,10 @@ import User from '../model/userModel';
 import authService from '../service/auth';
 import bcrypt from 'bcrypt';
 import Employee from '../model/employeeModel';
+import Salary from "../model/salaryModel";
+import Leave from "../model/leaveModel";
+import fs from "fs";
+import path from "path";
 
 const handleUserSignup = async (req: express.Request, res: express.Response): Promise<void> => {
   try {
@@ -147,36 +151,55 @@ const handleChangePassword = async (req: express.Request, res: express.Response)
 };
 
 
-const handleDeleteAccount = async (req: express.Request, res: express.Response): Promise<void> => {
+
+const handleDeleteAccount = async (
+  req: express.Request,
+  res: express.Response
+): Promise<express.Response> => {
   try {
     const userId = (req as any).user.id;
     const { email, password } = req.body;
 
     const user = await User.findById(userId);
-    if (!user) {
-      res.status(404).json({ message: "User not found" });
-      return;
-    }
+    if (!user) return res.status(404).json({ message: "User not found" });
 
-    if (user.email !== email) {
-      res.status(400).json({ message: "Incorrect email" });
-      return;
-    }
+    if (user.email !== email)
+      return res.status(400).json({ message: "Incorrect email" });
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      res.status(400).json({ message: "Incorrect password" });
-      return;
+    if (!isMatch)
+      return res.status(400).json({ message: "Incorrect password" });
+
+    // Find all employees created by this admin
+    const employees = await Employee.find({ createdBy: user._id.toString() });
+
+    for (const emp of employees) {
+      // Delete salaries
+      await Salary.deleteMany({ employee: emp._id });
+
+      // Delete leaves
+      await Leave.deleteMany({ employee: emp._id });
+
+      // Delete employee image
+      if (emp.image) {
+        const imagePath = path.join(__dirname, `../../${emp.image}`);
+        if (fs.existsSync(imagePath)) fs.unlinkSync(imagePath);
+      }
+
+      // Delete employee
+      await Employee.findByIdAndDelete(emp._id);
     }
 
-    await Employee.deleteMany({ createdBy: user._id.toString() });
+    // Delete admin
     await User.findByIdAndDelete(userId);
     res.clearCookie("uid");
 
-    res.status(200).json({ message: "Account and all associated data deleted" });
+    return res
+      .status(200)
+      .json({ message: "Admin and all associated employees, salaries, and leaves deleted" });
   } catch (error) {
     console.error("Error deleting account", error);
-    res.status(500).json({ message: "Something went wrong" });
+    return res.status(500).json({ message: "Something went wrong" });
   }
 };
 

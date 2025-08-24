@@ -167,10 +167,6 @@ const AdminSalary = () => {
               <td>{s.month}</td>
               <td
                 className={s.status === 'Paid' ? 'paid' : 'unpaid'}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleStatusUpdate(s._id, s.status === 'Paid' ? 'Unpaid' : 'Paid');
-                }}
               >
                 {s.status}
               </td>

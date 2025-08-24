@@ -3,6 +3,8 @@ import path from "path";
 import fs from "fs";
 import bcrypt from "bcrypt";
 import Employee from "../model/employeeModel";
+import Salary from "../model/salaryModel";
+import Leave from "../model/leaveModel";
 import User from "../model/userModel";
 
 // GET all employees
@@ -193,20 +195,28 @@ const deleteEmployees = async (req: express.Request, res: express.Response): Pro
     const { id } = req.params;
     const userId = (req as any).user.id;
 
-    const deleted = await Employee.findOneAndDelete({ _id: id, createdBy: userId });
-    if (!deleted) {
+    const employee = await Employee.findOne({ _id: id, createdBy: userId });
+    if (!employee) {
       res.status(404).json({ message: "Employee not found" });
       return;
     }
 
-    if (deleted.image) {
-      const imagePath = path.join(__dirname, `../../${deleted.image}`);
-      if (fs.existsSync(imagePath)) {
-        fs.unlinkSync(imagePath);
-      }
+    // Delete associated salaries
+    await Salary.deleteMany({ employee: employee._id });
+
+    // Delete associated leaves
+    await Leave.deleteMany({ employee: employee._id });
+
+    // Delete employee image
+    if (employee.image) {
+      const imagePath = path.join(__dirname, `../../${employee.image}`);
+      if (fs.existsSync(imagePath)) fs.unlinkSync(imagePath);
     }
 
-    res.status(200).json({ message: "Employee deleted successfully" });
+    // Delete employee
+    await Employee.findByIdAndDelete(employee._id);
+
+    res.status(200).json({ message: "Employee and associated salaries/leaves deleted successfully" });
   } catch (error) {
     res.status(500).json({ message: "Failed to delete employee", error });
   }
