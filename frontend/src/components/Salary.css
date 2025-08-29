@@ -154,12 +154,12 @@
   background: #999;
 }
 
-.image-preview {
+.salary-image-preview {
   text-align: center;
   margin-bottom: 12px;
 }
 
-.image-preview img {
+.salary-image-preview img {
   width: 60px;
   height: 60px;
   border-radius: 50%;

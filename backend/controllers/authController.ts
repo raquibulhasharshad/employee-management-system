@@ -155,20 +155,27 @@ const handleChangePassword = async (req: express.Request, res: express.Response)
 const handleDeleteAccount = async (
   req: express.Request,
   res: express.Response
-): Promise<express.Response> => {
+): Promise<void> => {
   try {
     const userId = (req as any).user.id;
     const { email, password } = req.body;
 
     const user = await User.findById(userId);
-    if (!user) return res.status(404).json({ message: "User not found" });
+    if (!user) {
+      res.status(404).json({ message: "User not found" });
+      return;
+    }
 
-    if (user.email !== email)
-      return res.status(400).json({ message: "Incorrect email" });
+    if (user.email !== email) {
+      res.status(400).json({ message: "Incorrect email" });
+      return;
+    }
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch)
-      return res.status(400).json({ message: "Incorrect password" });
+    if (!isMatch) {
+      res.status(400).json({ message: "Incorrect password" });
+      return;
+    }
 
     // Find all employees created by this admin
     const employees = await Employee.find({ createdBy: user._id.toString() });
@@ -194,14 +201,17 @@ const handleDeleteAccount = async (
     await User.findByIdAndDelete(userId);
     res.clearCookie("uid");
 
-    return res
-      .status(200)
-      .json({ message: "Admin and all associated employees, salaries, and leaves deleted" });
+    res.status(200).json({
+      message: "Admin and all associated employees, salaries, and leaves deleted"
+    });
+    return;
   } catch (error) {
     console.error("Error deleting account", error);
-    return res.status(500).json({ message: "Something went wrong" });
+    res.status(500).json({ message: "Something went wrong" });
+    return;
   }
 };
+
 
 
 const handleAuthCheck = (req: express.Request, res: express.Response): void => {
