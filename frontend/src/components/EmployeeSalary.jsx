@@ -13,6 +13,9 @@ const EmployeeSalary = () => {
   const [selectedYear, setSelectedYear] = useState('all');
   const [selectedMonth, setSelectedMonth] = useState('all');
   const [selectedSalary, setSelectedSalary] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const itemsPerPage = 5;
 
   const fetchMySalaries = async () => {
     try {
@@ -23,34 +26,42 @@ const EmployeeSalary = () => {
         setFiltered(data.salaries);
 
         const uniqueYears = [...new Set(data.salaries.map(s => s.month.split('-')[1]))];
-        setYears(uniqueYears.sort((a,b) => b - a));
+        setYears(uniqueYears.sort((a, b) => b - a));
       }
     } catch (err) {
       console.error('Error fetching employee salaries', err);
     }
   };
 
-  useEffect(()=>{ fetchMySalaries(); }, []);
+  useEffect(() => { fetchMySalaries(); }, []);
 
-  const handleFilter = () => {
-    let result = [...salaries];
-    if(selectedYear!=='all') result = result.filter(s=>s.month.split('-')[1]===selectedYear);
-    if(selectedMonth!=='all') result = result.filter(s=>s.month.split('-')[0]===selectedMonth);
+  const applyFilters = (list, year, month) => {
+    let result = [...list];
+    if (year !== 'all') result = result.filter(s => s.month.split('-')[1] === year);
+    if (month !== 'all') result = result.filter(s => s.month.split('-')[0] === month);
     setFiltered(result);
+    setCurrentPage(1); // reset to first page when filters change
   };
 
-  const handleYearChange = (year)=>{
+  const handleYearChange = (year) => {
     setSelectedYear(year);
     setSelectedMonth('all');
-    const monthsForYear = salaries.filter(s=>s.month.split('-')[1]===year).map(s=>s.month.split('-')[0]);
+    const monthsForYear = salaries
+      .filter(s => s.month.split('-')[1] === year)
+      .map(s => s.month.split('-')[0]);
     setMonths([...new Set(monthsForYear)]);
-    handleFilter();
+    applyFilters(salaries, year, 'all');
   };
 
-  const handleMonthChange = (month)=>{
+  const handleMonthChange = (month) => {
     setSelectedMonth(month);
-    handleFilter();
+    applyFilters(salaries, selectedYear, month);
   };
+
+  // pagination calculations
+  const indexOfLast = currentPage * itemsPerPage;
+  const indexOfFirst = indexOfLast - itemsPerPage;
+  const currentItems = filtered.slice(indexOfFirst, indexOfLast);
 
   return (
     <div className="employee-salary-page">
@@ -60,17 +71,17 @@ const EmployeeSalary = () => {
       <div className="salary-header employee-filters">
         <div className="filter-dropdown-year-employee">
           <label>Year:</label>
-          <select value={selectedYear} onChange={e=>handleYearChange(e.target.value)}>
+          <select value={selectedYear} onChange={e => handleYearChange(e.target.value)}>
             <option value="all">All Years</option>
-            {years.map(y=><option key={y} value={y}>{y}</option>)}
+            {years.map(y => <option key={y} value={y}>{y}</option>)}
           </select>
         </div>
 
         <div className="filter-dropdown-month-employee">
           <label>Month:</label>
-          <select value={selectedMonth} onChange={e=>handleMonthChange(e.target.value)}>
+          <select value={selectedMonth} onChange={e => handleMonthChange(e.target.value)}>
             <option value="all">All Months</option>
-            {months.map(m=><option key={m} value={m}>{m}</option>)}
+            {months.map(m => <option key={m} value={m}>{m}</option>)}
           </select>
         </div>
       </div>
@@ -87,22 +98,35 @@ const EmployeeSalary = () => {
           </tr>
         </thead>
         <tbody>
-          {filtered.map(s=>(
-            <tr key={s._id} onClick={()=>setSelectedSalary(s)} className="clickable-row">
+          {currentItems.map(s => (
+            <tr key={s._id} onClick={() => setSelectedSalary(s)} className="clickable-row">
               <td>{s.month}</td>
               <td>{s.basicSalary}</td>
               <td>{s.bonus}</td>
               <td>{s.deductions}</td>
               <td>{s.netSalary}</td>
-              <td className={s.status==='Paid'?'paid':'unpaid'}>{s.status}</td>
+              <td className={s.status === 'Paid' ? 'paid' : 'unpaid'}>{s.status}</td>
             </tr>
           ))}
         </tbody>
       </table>
 
-      <Footer totalPages={1} currentPage={1} setCurrentPage={()=>{}} totalL={filtered.length} currentL={filtered.length} />
+      {filtered.length > 0 && (
+        <Footer
+          currentPage={currentPage}
+          totalPages={Math.ceil(filtered.length / itemsPerPage)}
+          setCurrentPage={setCurrentPage}
+          totalL={filtered.length}
+          currentL={currentItems.length}
+        />
+      )}
 
-      {selectedSalary && <EmployeeSalaryDetailsModal salary={selectedSalary} onClose={()=>setSelectedSalary(null)} />}
+      {selectedSalary && (
+        <EmployeeSalaryDetailsModal
+          salary={selectedSalary}
+          onClose={() => setSelectedSalary(null)}
+        />
+      )}
     </div>
   );
 };

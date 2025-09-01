@@ -17,6 +17,9 @@ const AdminSalary = () => {
   const [showForm, setShowForm] = useState(false);
   const [selectedSalary, setSelectedSalary] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const itemsPerPage = 5;
 
   const defaultAvatar =
     'https://static.vecteezy.com/system/resources/thumbnails/009/292/244/small_2x/default-avatar-icon-of-social-media-user-vector.jpg';
@@ -58,6 +61,7 @@ const AdminSalary = () => {
     }
 
     setFiltered(result);
+    setCurrentPage(1); // reset to first page after filter
   };
 
   const handleSearch = (query) => {
@@ -99,6 +103,11 @@ const AdminSalary = () => {
     if (img) return img.startsWith('/uploads') ? `${API_BASE_URL.replace('/api', '')}${img}` : img;
     return defaultAvatar;
   };
+
+  // pagination calculations
+  const indexOfLast = currentPage * itemsPerPage;
+  const indexOfFirst = indexOfLast - itemsPerPage;
+  const currentItems = filtered.slice(indexOfFirst, indexOfLast);
 
   return (
     <div className="admin-salary-page">
@@ -152,7 +161,7 @@ const AdminSalary = () => {
           </tr>
         </thead>
         <tbody>
-          {filtered.map((s) => (
+          {currentItems.map((s) => (
             <tr key={s._id} onClick={() => setSelectedSalary(s)}>
               <td>
                 <img src={getImageUrl(s.employee?.image)} alt="Employee" className="salary-photo" />
@@ -165,9 +174,7 @@ const AdminSalary = () => {
               <td>{s.deductions}</td>
               <td>{s.netSalary}</td>
               <td>{s.month}</td>
-              <td
-                className={s.status === 'Paid' ? 'paid' : 'unpaid'}
-              >
+              <td className={s.status === 'Paid' ? 'paid' : 'unpaid'}>
                 {s.status}
               </td>
             </tr>
@@ -175,13 +182,15 @@ const AdminSalary = () => {
         </tbody>
       </table>
 
-      <Footer
-        totalPages={1}
-        currentPage={1}
-        setCurrentPage={() => {}}
-        totalL={filtered.length}
-        currentL={filtered.length}
-      />
+      {filtered.length > 0 && (
+        <Footer
+          currentPage={currentPage}
+          totalPages={Math.ceil(filtered.length / itemsPerPage)}
+          setCurrentPage={setCurrentPage}
+          totalL={filtered.length}
+          currentL={currentItems.length}
+        />
+      )}
 
       {showForm && <SalaryFormModal onClose={() => setShowForm(false)} onSuccess={fetchSalaries} />}
       {selectedSalary && (
