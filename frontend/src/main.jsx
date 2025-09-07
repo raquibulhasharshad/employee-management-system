@@ -1,40 +1,43 @@
-import React from 'react';
-import { createRoot } from 'react-dom/client';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import React from "react";
+import { createRoot } from "react-dom/client";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-import App from './App'; // Admin - Manage Employees
-import Login from './components/Login'; // Admin Login
-import Signup from './components/Signup'; // Admin Signup
-import ProtectedRoute from './components/ProtectedRoute';
-import EmployeeProtectedRoute from './components/EmployeeProtectedRoute';
+import App from "./App"; // Admin - Manage Employees
+import Login from "./components/Login"; // Admin Login
+import Signup from "./components/Signup"; // Admin Signup
+import ProtectedRoute from "./components/ProtectedRoute";
+import EmployeeProtectedRoute from "./components/EmployeeProtectedRoute";
 
-import Dashboard from './components/Dashboard';
-import Navbar from './components/Navbar';
-import Settings from './components/Settings';
-import ChangePassword from './components/ChangePassword';
+import Dashboard from "./components/Dashboard";
+import Navbar from "./components/Navbar";
+import Settings from "./components/Settings";
+import ChangePassword from "./components/ChangePassword";
 
-import EmployeeLogin from './components/EmployeeLogin';
-import EmployeeNavbar from './components/EmployeeNavbar';
-import EmployeeDashboard from './components/EmployeeDashboard';
-import EmployeeSettings from './components/EmployeeSettings';
-import MyProfile from './components/MyProfile';
-import RoleSelection from './components/RoleSelection';
+import EmployeeLogin from "./components/EmployeeLogin";
+import EmployeeNavbar from "./components/EmployeeNavbar";
+import EmployeeDashboard from "./components/EmployeeDashboard";
+import EmployeeSettings from "./components/EmployeeSettings";
+import MyProfile from "./components/MyProfile";
+import RoleSelection from "./components/RoleSelection";
 
-import AdminLeave from './components/AdminLeave';
-import EmployeeLeave from './components/EmployeeLeave';
+import AdminLeave from "./components/AdminLeave";
+import EmployeeLeave from "./components/EmployeeLeave";
 
-import AdminSalary from './components/AdminSalary';
-import EmployeeSalary from './components/EmployeeSalary';
+import AdminSalary from "./components/AdminSalary";
+import EmployeeSalary from "./components/EmployeeSalary";
 
-import './index.css';
+import AdminAttendance from "./components/AdminAttendance";
+import EmployeeAttendance from "./components/EmployeeAttendance";
+
+import "./index.css";
 
 const AppWithNavbar = ({ children }) => {
   const handleLogout = async () => {
-    await fetch('http://localhost:5000/api/auth/logout', {
-      method: 'POST',
-      credentials: 'include',
+    await fetch("http://localhost:5000/api/auth/logout", {
+      method: "POST",
+      credentials: "include",
     });
-    window.location.href = '/';
+    window.location.href = "/";
   };
 
   return (
@@ -47,11 +50,11 @@ const AppWithNavbar = ({ children }) => {
 
 const EmployeeWithNavbar = ({ children }) => {
   const handleLogout = async () => {
-    await fetch('http://localhost:5000/api/auth/employee/logout', {
-      method: 'POST',
-      credentials: 'include',
+    await fetch("http://localhost:5000/api/auth/employee/logout", {
+      method: "POST",
+      credentials: "include",
     });
-    window.location.href = '/';
+    window.location.href = "/";
   };
 
   return (
@@ -62,7 +65,7 @@ const EmployeeWithNavbar = ({ children }) => {
   );
 };
 
-createRoot(document.getElementById('root')).render(
+createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <BrowserRouter>
       <Routes>
@@ -114,6 +117,16 @@ createRoot(document.getElementById('root')).render(
           }
         />
         <Route
+          path="/dashboard/attendance"
+          element={
+            <ProtectedRoute>
+              <AppWithNavbar>
+                <AdminAttendance />
+              </AppWithNavbar>
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/dashboard/settings"
           element={
             <ProtectedRoute>
@@ -147,11 +160,41 @@ createRoot(document.getElementById('root')).render(
           }
         />
         <Route
+          path="/employee/profile"
+          element={
+            <EmployeeProtectedRoute>
+              <EmployeeWithNavbar>
+                <MyProfile />
+              </EmployeeWithNavbar>
+            </EmployeeProtectedRoute>
+          }
+        />
+        <Route
+          path="/employee/leave"
+          element={
+            <EmployeeProtectedRoute>
+              <EmployeeWithNavbar>
+                <EmployeeLeave />
+              </EmployeeWithNavbar>
+            </EmployeeProtectedRoute>
+          }
+        />
+        <Route
           path="/employee/salary"
           element={
             <EmployeeProtectedRoute>
               <EmployeeWithNavbar>
                 <EmployeeSalary />
+              </EmployeeWithNavbar>
+            </EmployeeProtectedRoute>
+          }
+        />
+        <Route
+          path="/employee/attendance"
+          element={
+            <EmployeeProtectedRoute>
+              <EmployeeWithNavbar>
+                <EmployeeAttendance />
               </EmployeeWithNavbar>
             </EmployeeProtectedRoute>
           }
@@ -172,26 +215,6 @@ createRoot(document.getElementById('root')).render(
             <EmployeeProtectedRoute>
               <EmployeeWithNavbar>
                 <ChangePassword />
-              </EmployeeWithNavbar>
-            </EmployeeProtectedRoute>
-          }
-        />
-        <Route
-          path="/employee/profile"
-          element={
-            <EmployeeProtectedRoute>
-              <EmployeeWithNavbar>
-                <MyProfile />
-              </EmployeeWithNavbar>
-            </EmployeeProtectedRoute>
-          }
-        />
-        <Route
-          path="/employee/leave"
-          element={
-            <EmployeeProtectedRoute>
-              <EmployeeWithNavbar>
-                <EmployeeLeave />
               </EmployeeWithNavbar>
             </EmployeeProtectedRoute>
           }

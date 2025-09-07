@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import './Navbar.css';
 import DeleteAccountModal from './DeleteAccountModal';
+import { API_BASE_URL } from '../constants';
 
 const Navbar = ({
   isDeleteDisabled = true,
@@ -11,6 +12,7 @@ const Navbar = ({
   onMail = () => {},
   onStatusChange = () => {},
   statusFilter = 'All',
+  onAttendanceOpened = () => {},
 }) => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -19,6 +21,7 @@ const Navbar = ({
   const getTitle = () => {
     if (location.pathname.startsWith('/dashboard/settings')) return 'Settings';
     if (location.pathname.startsWith('/dashboard/salary')) return 'Manage Salary';
+    if (location.pathname.startsWith('/dashboard/attendance')) return 'Manage Attendance';
     if (location.pathname.startsWith('/dashboard/leave')) return 'Manage Leaves';
     if (location.pathname.startsWith('/dashboard/employees')) return 'Manage Employees';
     return 'Dashboard';
@@ -66,22 +69,39 @@ const Navbar = ({
         <h2>Admin Panel</h2>
         <ul>
           <li>
-            <NavLink to="/dashboard" className={() => (location.pathname === '/dashboard' ? 'active' : '')}>
+            <NavLink
+              to="/dashboard"
+              className={() => (location.pathname === '/dashboard' ? 'active' : '')}
+            >
               Dashboard
             </NavLink>
           </li>
           <li>
             <NavLink
               to="/dashboard/employees"
-              className={() => (location.pathname.startsWith('/dashboard/employees') ? 'active' : '')}
+              className={() =>
+                location.pathname.startsWith('/dashboard/employees') ? 'active' : ''
+              }
             >
               Employees
             </NavLink>
           </li>
           <li>
             <NavLink
+              to="/dashboard/attendance"
+              className={() =>
+                location.pathname.startsWith('/dashboard/attendance') ? 'active' : ''
+              }
+            >
+              Attendance
+            </NavLink>
+          </li>
+          <li>
+            <NavLink
               to="/dashboard/leave"
-              className={() => (location.pathname.startsWith('/dashboard/leave') ? 'active' : '')}
+              className={() =>
+                location.pathname.startsWith('/dashboard/leave') ? 'active' : ''
+              }
             >
               Leave
             </NavLink>
@@ -89,7 +109,9 @@ const Navbar = ({
           <li>
             <NavLink
               to="/dashboard/salary"
-              className={() => (location.pathname.startsWith('/dashboard/salary') ? 'active' : '')}
+              className={() =>
+                location.pathname.startsWith('/dashboard/salary') ? 'active' : ''
+              }
             >
               Salary
             </NavLink>
@@ -97,7 +119,9 @@ const Navbar = ({
           <li>
             <NavLink
               to="/dashboard/settings"
-              className={() => (location.pathname.startsWith('/dashboard/settings') ? 'active' : '')}
+              className={() =>
+                location.pathname.startsWith('/dashboard/settings') ? 'active' : ''
+              }
             >
               Settings
             </NavLink>
@@ -111,10 +135,18 @@ const Navbar = ({
           {/* Employees page actions */}
           {location.pathname.startsWith('/dashboard/employees') && (
             <div className="action-buttons">
-              <button className={`Mail ${isMailDisabled ? 'inactive' : ''}`} onClick={onMail} disabled={isMailDisabled}>
+              <button
+                className={`Mail ${isMailDisabled ? 'inactive' : ''}`}
+                onClick={onMail}
+                disabled={isMailDisabled}
+              >
                 📧 Mail
               </button>
-              <button className={`Del ${isDeleteDisabled ? 'inactive' : ''}`} onClick={onDelete} disabled={isDeleteDisabled}>
+              <button
+                className={`Del ${isDeleteDisabled ? 'inactive' : ''}`}
+                onClick={onDelete}
+                disabled={isDeleteDisabled}
+              >
                 🗑️ Delete
               </button>
               <button className="Add" onClick={onAdd}>
@@ -133,24 +165,46 @@ const Navbar = ({
           {/* Leave page filters */}
           {location.pathname.startsWith('/dashboard/leave') && (
             <div className="leave-filters">
-              <button className={statusFilter === 'Pending' ? 'active' : ''} onClick={() => onStatusChange('Pending')}>
+              <button
+                className={statusFilter === 'Pending' ? 'active' : ''}
+                onClick={() => onStatusChange('Pending')}
+              >
                 Pending
               </button>
-              <button className={statusFilter === 'Approved' ? 'active' : ''} onClick={() => onStatusChange('Approved')}>
+              <button
+                className={statusFilter === 'Approved' ? 'active' : ''}
+                onClick={() => onStatusChange('Approved')}
+              >
                 Approved
               </button>
-              <button className={statusFilter === 'Rejected' ? 'active' : ''} onClick={() => onStatusChange('Rejected')}>
+              <button
+                className={statusFilter === 'Rejected' ? 'active' : ''}
+                onClick={() => onStatusChange('Rejected')}
+              >
                 Rejected
               </button>
-              <button className={statusFilter === 'All' ? 'active' : ''} onClick={() => onStatusChange('All')}>
+              <button
+                className={statusFilter === 'All' ? 'active' : ''}
+                onClick={() => onStatusChange('All')}
+              >
                 All
               </button>
             </div>
           )}
 
+          {/* Attendance page actions */}
+          {location.pathname.startsWith('/dashboard/attendance') && (
+            <button className="Add" onClick={onAttendanceOpened}>
+              📅 Open Attendance
+            </button>
+          )}
+
           {/* Settings page delete account */}
           {location.pathname.startsWith('/dashboard/settings') && (
-            <button className="DeleteAccount" onClick={() => setShowDeleteModal(true)}>
+            <button
+              className="DeleteAccount"
+              onClick={() => setShowDeleteModal(true)}
+            >
               🗑️ Delete Account
             </button>
           )}
@@ -162,7 +216,10 @@ const Navbar = ({
       </nav>
 
       {showDeleteModal && (
-        <DeleteAccountModal onClose={() => setShowDeleteModal(false)} onConfirm={handleDeleteAccount} />
+        <DeleteAccountModal
+          onClose={() => setShowDeleteModal(false)}
+          onConfirm={handleDeleteAccount}
+        />
       )}
     </>
   );
