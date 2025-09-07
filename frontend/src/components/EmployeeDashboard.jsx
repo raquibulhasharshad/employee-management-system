@@ -58,12 +58,15 @@ const EmployeeDashboard = () => {
   };
 
   const fetchTodayAttendance = async () => {
-    const today = new Date().toISOString().split("T")[0];
+    // Get local YYYY-MM-DD date
+    const today = new Date();
+    const localDate = today.toLocaleDateString("en-CA"); // "YYYY-MM-DD" in local timezone
+
     try {
       const res = await fetch(`${API_BASE_URL}/attendance/my`, { credentials: "include" });
       if (res.ok) {
         const data = await res.json();
-        const todayRecord = data.find((a) => a.date === today) || null;
+        const todayRecord = data.find((a) => a.date === localDate) || null;
         setAttendance(todayRecord);
       }
     } catch (err) {
@@ -88,7 +91,8 @@ const EmployeeDashboard = () => {
           <h2 className="employee-dashboard-welcome">Welcome, {employeeName} 👋</h2>
         </div>
         <p className="employee-dashboard-time">
-          {currentTime.toLocaleDateString()} {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+          {currentTime.toLocaleDateString()}{" "}
+          {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
         </p>
       </div>
 

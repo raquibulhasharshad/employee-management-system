@@ -31,10 +31,11 @@ const Dashboard = () => {
     }
   };
 
-  // Fetch attendance (today’s status only)
+  // Fetch attendance (today’s status only, local timezone)
   const fetchAttendance = async () => {
-    const today = new Date().toISOString().split("T")[0];
-    const res = await fetch(`${API_BASE_URL}/attendance/date/${today}`, { credentials: "include" });
+    const today = new Date();
+    const localDate = today.toLocaleDateString("en-CA"); // YYYY-MM-DD format
+    const res = await fetch(`${API_BASE_URL}/attendance/date/${localDate}`, { credentials: "include" });
     if (res.ok) {
       const data = await res.json();
       setPresentEmployees(data.filter(a => a.status === "Present").length);
@@ -60,7 +61,8 @@ const Dashboard = () => {
       <div className="dashboard-header">
         <h2 className="dashboard-title">Welcome Admin 👋</h2>
         <p className="dashboard-time">
-          {currentTime.toLocaleDateString()} {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+          {currentTime.toLocaleDateString()}{" "}
+          {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
         </p>
       </div>
       <div className="dashboard-cards">
