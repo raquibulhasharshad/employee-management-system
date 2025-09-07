@@ -119,23 +119,23 @@ const EmployeeNavbar = ({
         <div className="navbar-right">
           {location.pathname === "/employee/leave" && (
             <button className="Add" onClick={onAddLeave}>
-              Add Leave
+              ➕ Add Leave
             </button>
           )}
 
           {location.pathname === "/employee/attendance" && (
             <>
               <button className="Add" onClick={handleCheckInClick}>
-                Check-in
+                ⏰ Check-in
               </button>
               <button className="Add" onClick={handleCheckOutClick}>
-                Check-out
+                🏁 Check-out
               </button>
             </>
           )}
 
           <button className="Logout" onClick={handleLogout}>
-            Logout
+            🚪Logout
           </button>
         </div>
       </div>
