@@ -29,6 +29,12 @@ import EmployeeSalary from "./components/EmployeeSalary";
 import AdminAttendance from "./components/AdminAttendance";
 import EmployeeAttendance from "./components/EmployeeAttendance";
 
+// 🔹 Forgot / Reset Password
+import ForgotPassword from "./components/ForgotPassword"; // Admin forgot password
+import ResetPassword from "./components/ResetPassword";   // Admin reset password
+import EmployeeForgotPassword from "./components/EmployeeForgotPassword";
+import EmployeeResetPassword from "./components/EmployeeResetPassword";
+
 import "./index.css";
 
 const AppWithNavbar = ({ children }) => {
@@ -72,9 +78,11 @@ createRoot(document.getElementById("root")).render(
         {/* Role selection homepage */}
         <Route path="/" element={<RoleSelection />} />
 
-        {/* Admin routes */}
+        {/* ================== ADMIN ROUTES ================== */}
         <Route path="/admin/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/admin/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
 
         <Route
           path="/dashboard"
@@ -147,8 +155,11 @@ createRoot(document.getElementById("root")).render(
           }
         />
 
-        {/* Employee routes */}
+        {/* ================== EMPLOYEE ROUTES ================== */}
         <Route path="/employee/login" element={<EmployeeLogin />} />
+        <Route path="/employee/forgot-password" element={<EmployeeForgotPassword />} />
+        <Route path="/employee/reset-password/:token" element={<EmployeeResetPassword />} />
+
         <Route
           path="/employee/dashboard"
           element={

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import './Auth.css';
 
 const EmployeeLogin = () => {
@@ -53,6 +53,7 @@ const EmployeeLogin = () => {
         {error && <div className="error-msg">{error}</div>}
         <button type="submit">Login</button>
       </form>
+      <p><Link to="/employee/forgot-password">Forgot Password?</Link></p>
     </div>
   );
 };

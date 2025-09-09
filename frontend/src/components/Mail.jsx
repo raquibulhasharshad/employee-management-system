@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import './Mail.css';
-import emailjs from '@emailjs/browser';
 
 const Mail = ({ isOpen, onClose, toEmails, OnSend }) => {
   const [subject, setSubject] = useState('');
@@ -16,46 +15,47 @@ const Mail = ({ isOpen, onClose, toEmails, OnSend }) => {
 
   if (!isOpen) return null;
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!subject || !body) {
       OnSend({ type: 'error', message: 'Please fill all the fields' });
       return;
     }
 
-    setIsSending(true); 
+    setIsSending(true);
 
-    const templateParams = {
-      to_email: toEmails.join(', '),
-      subject: subject,
-      message: body,
-    };
-
-    emailjs
-      .send(
-        import.meta.env.VITE_EMAILJS_SERVICE_ID,
-        import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
-        templateParams,
-        import.meta.env.VITE_EMAILJS_PUBLIC_KEY
-      )
-      .then(() => {
-        OnSend({
-          type: 'success',
-          message: `Mail sent to: ${toEmails.join(', ')}`,
-          toEmails,
+    try {
+      const res = await fetch("http://localhost:5000/api/mail/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          toEmails,   // ✅ match backend
           subject,
-          body,
-        });
-        setIsSending(false); 
-        onClose();
-      })
-      .catch((error) => {
-        console.error(error);
-        OnSend({
-          type: 'error',
-          message: 'Failed to send email. Please try again',
-        });
-        setIsSending(false); 
+          body,       // ✅ match backend
+        }),
       });
+
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.message || "Failed to send email");
+
+      OnSend({
+        type: 'success',
+        message: `Mail sent to: ${toEmails.join(', ')}`,
+        toEmails,
+        subject,
+        body,
+      });
+
+      setIsSending(false);
+      onClose();
+    } catch (error) {
+      console.error(error);
+      OnSend({
+        type: 'error',
+        message: 'Failed to send email. Please try again',
+      });
+      setIsSending(false);
+    }
   };
 
   return (
@@ -91,13 +91,9 @@ const Mail = ({ isOpen, onClose, toEmails, OnSend }) => {
           <button
             onClick={handleSend}
             className={isSending ? 'sending' : ''}
-            disabled={isSending} 
+            disabled={isSending}
           >
-            {isSending ? (
-              <>Sending... ⏳</> 
-            ) : (
-              'Send'
-            )}
+            {isSending ? <>Sending... ⏳</> : 'Send'}
           </button>
           <button
             onClick={onClose}

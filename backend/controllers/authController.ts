@@ -7,6 +7,17 @@ import Salary from "../model/salaryModel";
 import Leave from "../model/leaveModel";
 import fs from "fs";
 import path from "path";
+import nodemailer from "nodemailer";
+
+const otpStore: Record<string, { otp: string; expires: number }> = {};
+
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.MAIL_USER,
+    pass: process.env.MAIL_PASS,
+  },
+});
 
 const handleUserSignup = async (req: express.Request, res: express.Response): Promise<void> => {
   try {
@@ -150,7 +161,58 @@ const handleChangePassword = async (req: express.Request, res: express.Response)
   }
 };
 
+// ------------------- Forgot Password (Admin) -------------------
 
+const handleForgotPassword = async (req: express.Request, res: express.Response) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+    if (!user) {
+      res.status(404).json({ message: "Admin not found" });
+      return;
+    }
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    otpStore[email] = { otp, expires: Date.now() + 5 * 60 * 1000 };
+
+    await transporter.sendMail({
+      from: process.env.MAIL_USER,
+      to: email,
+      subject: "EMS Admin Password Reset",
+      text: `Your OTP is ${otp}. It is valid for 5 minutes.`,
+    });
+
+    res.status(200).json({ message: "OTP sent to email" });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to send OTP", error });
+  }
+};
+
+const handleResetPassword = async (req: express.Request, res: express.Response) => {
+  try {
+    const { email, otp, newPassword } = req.body;
+    const record = otpStore[email];
+
+    if (!record || record.otp !== otp || record.expires < Date.now()) {
+      res.status(400).json({ message: "Invalid or expired OTP" });
+      return;
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      res.status(404).json({ message: "Admin not found" });
+      return;
+    }
+
+    user.password = await bcrypt.hash(newPassword, 10);
+    await user.save();
+    delete otpStore[email];
+
+    res.status(200).json({ message: "Password reset successful" });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to reset password", error });
+  }
+};
 
 const handleDeleteAccount = async (
   req: express.Request,
@@ -177,42 +239,31 @@ const handleDeleteAccount = async (
       return;
     }
 
-    // Find all employees created by this admin
     const employees = await Employee.find({ createdBy: user._id.toString() });
 
     for (const emp of employees) {
-      // Delete salaries
       await Salary.deleteMany({ employee: emp._id });
-
-      // Delete leaves
       await Leave.deleteMany({ employee: emp._id });
 
-      // Delete employee image
       if (emp.image) {
         const imagePath = path.join(__dirname, `../../${emp.image}`);
         if (fs.existsSync(imagePath)) fs.unlinkSync(imagePath);
       }
 
-      // Delete employee
       await Employee.findByIdAndDelete(emp._id);
     }
 
-    // Delete admin
     await User.findByIdAndDelete(userId);
     res.clearCookie("uid");
 
     res.status(200).json({
       message: "Admin and all associated employees, salaries, and leaves deleted"
     });
-    return;
   } catch (error) {
     console.error("Error deleting account", error);
     res.status(500).json({ message: "Something went wrong" });
-    return;
   }
 };
-
-
 
 const handleAuthCheck = (req: express.Request, res: express.Response): void => {
   try {
@@ -244,5 +295,7 @@ export {
   handleGetAdminDetails,
   handleUpdateAdmin,
   handleChangePassword,
-  handleDeleteAccount
+  handleDeleteAccount,
+  handleForgotPassword,
+  handleResetPassword
 };

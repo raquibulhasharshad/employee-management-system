@@ -2,7 +2,17 @@ import express from "express";
 import Employee from "../model/employeeModel";
 import bcrypt from "bcrypt";
 import employeeAuthService from "../service/employeeAuthService";
+import nodemailer from "nodemailer";
 
+const otpStore: Record<string, { otp: string; expires: number }> = {};
+
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.MAIL_USER,
+    pass: process.env.MAIL_PASS,
+  },
+});
 
 const handleEmployeeLogin = async (req: express.Request, res: express.Response): Promise<void> => {
   try {
@@ -95,7 +105,6 @@ const handleEmployeeChangePassword = async (req: express.Request, res: express.R
   }
 };
 
-
 const handleGetEmployeeDetails = async (req: express.Request, res: express.Response): Promise<void> => {
   try {
     const userId = (req as any).user.id;
@@ -112,10 +121,65 @@ const handleGetEmployeeDetails = async (req: express.Request, res: express.Respo
   }
 };
 
+// ------------------- Forgot Password (Employee) -------------------
+
+const handleEmployeeForgotPassword = async (req: express.Request, res: express.Response) => {
+  try {
+    const { email } = req.body;
+    const employee = await Employee.findOne({ email });
+    if (!employee) {
+      res.status(404).json({ message: "Employee not found" });
+      return;
+    }
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    otpStore[email] = { otp, expires: Date.now() + 5 * 60 * 1000 };
+
+    await transporter.sendMail({
+      from: process.env.MAIL_USER,
+      to: email,
+      subject: "EMS Employee Password Reset",
+      text: `Your OTP is ${otp}. It is valid for 5 minutes.`,
+    });
+
+    res.status(200).json({ message: "OTP sent to email" });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to send OTP", error });
+  }
+};
+
+const handleEmployeeResetPassword = async (req: express.Request, res: express.Response) => {
+  try {
+    const { email, otp, newPassword } = req.body;
+    const record = otpStore[email];
+
+    if (!record || record.otp !== otp || record.expires < Date.now()) {
+      res.status(400).json({ message: "Invalid or expired OTP" });
+      return;
+    }
+
+    const employee = await Employee.findOne({ email });
+    if (!employee) {
+      res.status(404).json({ message: "Employee not found" });
+      return;
+    }
+
+    employee.password = await bcrypt.hash(newPassword, 10);
+    await employee.save();
+    delete otpStore[email];
+
+    res.status(200).json({ message: "Password reset successful" });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to reset password", error });
+  }
+};
+
 export {
   handleEmployeeLogin,
   handleEmployeeLogout,
   handleEmployeeAuthCheck,
   handleEmployeeChangePassword,
-  handleGetEmployeeDetails
+  handleGetEmployeeDetails,
+  handleEmployeeForgotPassword,
+  handleEmployeeResetPassword
 };
