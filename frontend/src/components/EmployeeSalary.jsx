@@ -65,8 +65,8 @@ const EmployeeSalary = () => {
 
   return (
     <div className="employee-salary-page">
-      <h2>My Salary</h2>
       <Navbar isDeleteDisabled isMailDisabled />
+      <h2>My Salary</h2>
 
       <div className="salary-header employee-filters">
         <div className="filter-dropdown-year-employee">
@@ -86,30 +86,38 @@ const EmployeeSalary = () => {
         </div>
       </div>
 
-      <table className="salary-table">
-        <thead>
-          <tr>
-            <th>Month</th>
-            <th>Basic</th>
-            <th>Bonus</th>
-            <th>Deductions</th>
-            <th>Net Salary</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          {currentItems.map(s => (
-            <tr key={s._id} onClick={() => setSelectedSalary(s)} className="clickable-row">
-              <td>{s.month}</td>
-              <td>{s.basicSalary}</td>
-              <td>{s.bonus}</td>
-              <td>{s.deductions}</td>
-              <td>{s.netSalary}</td>
-              <td className={s.status === 'Paid' ? 'paid' : 'unpaid'}>{s.status}</td>
+      {/* Scrollable Table Wrapper */}
+      <div className="salary-table-wrapper">
+        <table className="salary-table">
+          <thead>
+            <tr>
+              <th>Month</th>
+              <th>Basic</th>
+              <th>Bonus</th>
+              <th>Deductions</th>
+              <th>Net Salary</th>
+              <th>Status</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {currentItems.map(s => (
+              <tr key={s._id} onClick={() => setSelectedSalary(s)} className="clickable-row">
+                <td>{s.month}</td>
+                <td>{s.basicSalary}</td>
+                <td>{s.bonus}</td>
+                <td>{s.deductions}</td>
+                <td>{s.netSalary}</td>
+                <td className={s.status === 'Paid' ? 'paid' : 'unpaid'}>{s.status}</td>
+              </tr>
+            ))}
+            {currentItems.length === 0 && (
+              <tr>
+                <td colSpan="6" className="no-data">No salary records found</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
 
       {filtered.length > 0 && (
         <Footer

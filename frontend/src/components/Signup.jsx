@@ -33,8 +33,14 @@ const Signup = () => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ adminName, companyName, email, phone, address, password })
     })
-      .then(res => {
-        if (!res.ok) throw new Error('Signup failed');
+      .then(async res => {
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          if (data.message && data.message.toLowerCase().includes("email")) {
+            throw new Error("Email ID already exists");
+          }
+          throw new Error(data.message || "Signup failed");
+        }
         return res.json();
       })
       .then(() => {
@@ -47,17 +53,52 @@ const Signup = () => {
   return (
     <div className="auth-container">
       <h2>Admin Signup</h2>
-      <form onSubmit={handleSignup}>
-        <input type="text" placeholder="Admin Name" value={adminName} onChange={e => setAdminName(e.target.value)} required />
-        <input type="text" placeholder="Company Name" value={companyName} onChange={e => setCompanyName(e.target.value)} required />
-        <input type="email" placeholder="Email Address" value={email} onChange={e => setEmail(e.target.value)} required />
-        <input type="tel" placeholder="Phone Number" value={phone} onChange={e => setPhone(e.target.value)} required />
-        <textarea placeholder="Company Address (Optional)" value={address} onChange={e => setAddress(e.target.value)} />
-        <input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} required />
-        <input type="password" placeholder="Confirm Password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} required />
+      <form onSubmit={handleSignup} noValidate>
+        <input
+          type="text"
+          placeholder="Admin Name"
+          value={adminName}
+          onChange={e => setAdminName(e.target.value)}
+        />
+        <input
+          type="text"
+          placeholder="Company Name"
+          value={companyName}
+          onChange={e => setCompanyName(e.target.value)}
+        />
+        <input
+          type="email"
+          placeholder="Email Address"
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+        />
+        <input
+          type="tel"
+          placeholder="Phone Number"
+          value={phone}
+          onChange={e => setPhone(e.target.value)}
+        />
+        <textarea
+          placeholder="Company Address (Optional)"
+          value={address}
+          onChange={e => setAddress(e.target.value)}
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={e => setPassword(e.target.value)}
+        />
+        <input
+          type="password"
+          placeholder="Confirm Password"
+          value={confirmPassword}
+          onChange={e => setConfirmPassword(e.target.value)}
+        />
         {error && <div className="error-msg">{error}</div>}
         <button type="submit">Create Account</button>
       </form>
+
       <p>Already have an account? <a href="/admin/login">Login</a></p>
     </div>
   );

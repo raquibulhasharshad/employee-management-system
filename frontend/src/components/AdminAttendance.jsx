@@ -12,14 +12,12 @@ const AdminAttendance = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [dateFilter, setDateFilter] = useState(
-    new Date().toLocaleDateString("en-CA") // ✅ local date
+    new Date().toLocaleDateString("en-CA")
   );
   const [statusFilter, setStatusFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
 
   const recordsPerPage = 5;
-
-  // ✅ today's date in local timezone
   const today = new Date().toLocaleDateString("en-CA");
 
   useEffect(() => {
@@ -40,12 +38,10 @@ const AdminAttendance = () => {
   };
 
   const openAttendanceForDate = async () => {
-    // Prevent opening attendance for previous dates
     if (dateFilter < today) {
       alert("Cannot open attendance for previous dates.");
       return;
     }
-
     try {
       const res = await fetch(`${API_BASE_URL}/attendance/open`, {
         method: "POST",
@@ -76,13 +72,9 @@ const AdminAttendance = () => {
     query = searchQuery
   ) => {
     let result = [...list];
-
-    // status filter
     if (status !== "all") {
       result = result.filter((rec) => rec.status === status);
     }
-
-    // search filter
     if (query.trim()) {
       const lower = query.toLowerCase();
       result = result.filter(
@@ -92,7 +84,6 @@ const AdminAttendance = () => {
           rec.employee?.department?.toLowerCase().includes(lower)
       );
     }
-
     setFiltered(result);
     setCurrentPage(1);
   };
@@ -135,6 +126,7 @@ const AdminAttendance = () => {
             onClear={handleClearSearch}
             placeholder="Search by Name, ID, Dept"
           />
+
           <div className="filters">
             <label>
               Date:
@@ -160,52 +152,55 @@ const AdminAttendance = () => {
           </div>
         </div>
 
-        <table className="admin-attendance-table">
-          <thead>
-            <tr>
-              <th>S.No</th>
-              <th>Image</th>
-              <th>Emp ID</th>
-              <th>Name</th>
-              <th>Department</th>
-              <th>Check-in</th>
-              <th>Check-out</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {currentRecords.length > 0 ? (
-              currentRecords.map((rec, index) => (
-                <tr
-                  key={rec._id}
-                  onClick={() => setSelectedRecord(rec)}
-                  className="clickable-row"
-                >
-                  <td>{indexOfFirst + index + 1}</td>
-                  <td>
-                    <img
-                      src={getImageUrl(rec.employee?.image)}
-                      alt={rec.employee?.name}
-                      className="admin-attendance-img"
-                    />
-                  </td>
-                  <td>{rec.employee?.empId}</td>
-                  <td>{rec.employee?.name}</td>
-                  <td>{rec.employee?.department}</td>
-                  <td>{rec.checkIn || "-"}</td>
-                  <td>{rec.checkOut || "-"}</td>
-                  <td className={getStatusClass(rec.status)}>{rec.status}</td>
-                </tr>
-              ))
-            ) : (
+        {/* --- Swipeable wrapper --- */}
+        <div className="table-wrapper">
+          <table className="admin-attendance-table">
+            <thead>
               <tr>
-                <td colSpan="8" className="no-data">
-                  No attendance records found
-                </td>
+                <th>S.No</th>
+                <th>Image</th>
+                <th>Emp ID</th>
+                <th>Name</th>
+                <th>Department</th>
+                <th>Check-in</th>
+                <th>Check-out</th>
+                <th>Status</th>
               </tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {currentRecords.length > 0 ? (
+                currentRecords.map((rec, index) => (
+                  <tr
+                    key={rec._id}
+                    onClick={() => setSelectedRecord(rec)}
+                    className="clickable-row"
+                  >
+                    <td>{indexOfFirst + index + 1}</td>
+                    <td>
+                      <img
+                        src={getImageUrl(rec.employee?.image)}
+                        alt={rec.employee?.name}
+                        className="admin-attendance-img"
+                      />
+                    </td>
+                    <td>{rec.employee?.empId}</td>
+                    <td>{rec.employee?.name}</td>
+                    <td>{rec.employee?.department}</td>
+                    <td>{rec.checkIn || "-"}</td>
+                    <td>{rec.checkOut || "-"}</td>
+                    <td className={getStatusClass(rec.status)}>{rec.status}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="8" className="no-data">
+                    No attendance records found
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
 
         {totalRecords > 0 && (
           <Footer

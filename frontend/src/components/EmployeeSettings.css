@@ -1,31 +1,46 @@
+/* ================== PAGE CONTAINER ================== */
 .settings-wrapper {
   display: flex;
-  justify-content: center;
+  justify-content: flex-start; /* align content to left */
   padding: 40px 20px;
   background-color: #f9f9f9;
   min-height: 100vh;
-  align-items: center;
+  align-items: flex-start; /* align top so it doesn’t overlap sidebar */
+  margin-top: 70px; /* space for top navbar */
+  margin-left: 230px; /* space for sidebar */
+  box-sizing: border-box;
+  overflow-x: auto; /* scroll horizontally if needed */
+  white-space: nowrap; /* keep content in one line for scroll */
 }
 
+/* ================== SETTINGS BOX ================== */
 .settings-box {
   background-color: white;
   padding: 30px 40px;
   border-radius: 12px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   width: 100%;
-  max-width: 500px;
+  max-width: 600px;
+  min-width: 300px; /* allow scroll on very small screens */
   height: auto;
+  box-sizing: border-box;
+
+  /* shift more left */
+  margin-left: 0; /* remove default centering */
 }
 
+/* ================== HEADING ================== */
 .settings-heading {
   font-size: 24px;
   font-weight: 600;
   margin-bottom: 25px;
-  text-align: center;
+  text-align: left; /* align heading to left */
   border-bottom: 2px solid #e0e0e0;
   padding-bottom: 10px;
+  color: #333;
 }
 
+/* ================== FORM ================== */
 .settings-form {
   display: flex;
   flex-direction: column;
@@ -38,15 +53,20 @@
 }
 
 .settings-form input {
+  width: 100%;
   padding: 10px 12px;
   border: 1px solid #ccc;
   border-radius: 6px;
   font-size: 14px;
+  min-width: 200px; /* prevent shrinking too much */
 }
 
+/* ================== BUTTONS ================== */
 .settings-buttons {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: 10px;
   margin-top: 20px;
 }
 
@@ -57,6 +77,7 @@
   font-size: 14px;
   border-radius: 6px;
   cursor: pointer;
+  flex: 1; /* stretch buttons equally on small screens */
 }
 
 .save-btn {
@@ -69,6 +90,7 @@
   color: white;
 }
 
+/* ================== MESSAGES ================== */
 .error-message {
   color: #d32f2f;
   font-size: 14px;

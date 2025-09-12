@@ -3,49 +3,59 @@
   font-family: sans-serif;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  margin-left: 200px; /* align with sidebar */
+  align-items: flex-start;
+
+  /* Keep container right of sidebar */
+  margin-left: 230px; 
   margin-top: 50px;
+
+  /* Horizontal scroll if content overflows */
+  overflow-x: auto;
+  width: calc(100% - 230px);
 }
 
-.employee-attendance-header {
-  width: 100%;
-  max-width: 900px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-}
-
-.employee-attendance-header h2 {
-  font-size: 22px;
+.heading {
+  font-size: 24px;
   font-weight: 600;
   color: #333;
+  margin-bottom: 20px;
 }
 
+.attendance-filters {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+}
+
+/* Wrapper to enable table scroll horizontally */
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+/* Table */
 .employee-attendance-table {
   width: 100%;
-  max-width: 900px;
+  min-width: 900px; /* table minimum width */
   border-collapse: collapse;
   background-color: #fff;
   box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
   border-radius: 6px;
-  overflow: hidden;
 }
 
-.employee-attendance-table th {
-  background-color: #f0f0f0;
-  color: #333;
-  font-weight: 600;
-  padding: 10px;
-  text-align: center;
-  border-bottom: 2px solid #ddd;
-}
-
+.employee-attendance-table th,
 .employee-attendance-table td {
   padding: 10px;
   text-align: center;
   border-bottom: 1px solid #eee;
+  white-space: nowrap; /* prevent wrapping */
+}
+
+.employee-attendance-table th {
+  background-color: #f0f0f0;
+  font-weight: 600;
+  border-bottom: 2px solid #ddd;
 }
 
 .employee-attendance-table tbody tr:hover {
@@ -55,7 +65,6 @@
 
 .employee-attendance-footer {
   margin-top: 15px;
-  max-width: 900px;
   width: 100%;
 }
 
@@ -66,11 +75,4 @@
   font-style: italic;
 }
 
-.heading{
-  margin-right: 730px;
-}
 
-
-.attendance-filters{
-  margin-right: 630px;
-}

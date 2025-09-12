@@ -1,11 +1,12 @@
 import express from "express";
+import User from "../model/userModel"; // <-- make sure this points to your Admin/User schema
 
 const validateSignupFields = (
   req: express.Request,
   res: express.Response,
   next: express.NextFunction
 ): void => {
-  const {adminName, companyName, email, phone, password } = req.body;
+  const { adminName, companyName, email, phone, password } = req.body;
 
   if (!adminName) {
     res.status(400).json({ message: "Admin Name is required" });
@@ -40,12 +41,22 @@ const validateSignupFields = (
   }
 
   if (!password || password.length < 6) {
-  res.status(400).json({ message: "Password must be at least 6 characters" });
-  return;
-}
+    res.status(400).json({ message: "Password must be at least 6 characters" });
+    return;
+  }
 
-
-  next();
+  // ➡️ NEW: check if email already exists
+  User.findOne({ email })
+    .then((existing) => {
+      if (existing) {
+        res.status(400).json({ message: "Email ID already exists" });
+        return;
+      }
+      next();
+    })
+    .catch(() => {
+      res.status(500).json({ message: "Server error while checking email" });
+    });
 };
 
 export default validateSignupFields;

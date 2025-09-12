@@ -3,7 +3,7 @@
   font-family: sans-serif;
   display: flex;
   flex-direction: column;
-  align-items: center; /* Center navbar and table */
+
 }
 
 .leave-navbar {

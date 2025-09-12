@@ -1,3 +1,4 @@
+/* ================== OVERLAY ================== */
 .form-overlay {
   position: fixed;
   top: 0;
@@ -9,11 +10,15 @@
   justify-content: center;
   align-items: center;
   z-index: 999;
+  padding: 15px; /* extra space on small screens */
+  box-sizing: border-box;
+  overflow-y: auto;
 }
 
+/* ================== FORM BOX ================== */
 .form-box {
   background-color: white;
-  width: 90%;
+  width: 100%;
   max-width: 900px;
   max-height: 90vh;
   overflow-y: auto;
@@ -21,6 +26,7 @@
   border-radius: 15px;
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
   position: relative;
+  box-sizing: border-box;
 }
 
 .form-box h2 {
@@ -30,6 +36,7 @@
   color: #333;
 }
 
+/* ================== FORM GRID ================== */
 .form-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -37,7 +44,17 @@
   align-items: start;
 }
 
+.form-grid input,
+.form-grid select {
+  padding: 12px;
+  font-size: 15px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  width: 100%;
+  background: #fff;
+}
 
+/* ================== IMAGE PREVIEW ================== */
 .image-preview {
   grid-column: span 2;
   display: flex;
@@ -47,9 +64,8 @@
 }
 
 .image-wrapper {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  position: relative;
+  display: inline-block;
   margin-bottom: 0;
 }
 
@@ -61,6 +77,30 @@
   border: 3px solid #007bff;
 }
 
+/* Remove image button */
+.image-remove {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background-color: #ff4d4d;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 26px;
+  height: 26px;
+  font-size: 16px;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease-in-out;
+  line-height: 26px;
+  text-align: center;
+  padding: 0;
+}
+
+.image-remove:hover {
+  background-color: #e60000;
+  transform: scale(1.1);
+}
 
 .image-upload-below {
   grid-column: span 2;
@@ -80,18 +120,7 @@
   max-width: 200px;
 }
 
-
-.form-grid input,
-.form-grid select {
-  padding: 12px;
-  font-size: 15px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  width: 100%;
-  background: #fff;
-}
-
-
+/* ================== ERROR MESSAGES ================== */
 .error {
   color: red;
   font-size: 13px;
@@ -99,13 +128,14 @@
   text-align: start;
 }
 
-
+/* ================== FORM BUTTONS ================== */
 .form-buttons {
   grid-column: span 2;
   display: flex;
   justify-content: flex-end;
   gap: 15px;
   margin-top: 10px;
+  flex-wrap: wrap;
 }
 
 .form-buttons button {
@@ -132,10 +162,17 @@
   opacity: 0.9;
 }
 
+/* ================== RESPONSIVE ================== */
+@media (max-width: 950px) {
+  .form-box {
+    padding: 20px;
+  }
+}
 
 @media (max-width: 700px) {
   .form-grid {
     grid-template-columns: 1fr;
+    gap: 15px;
   }
 
   .form-buttons {
@@ -157,34 +194,23 @@
   }
 }
 
-.image-wrapper {
-  position: relative;
-  display: inline-block;
-  margin-bottom: 0;
+@media (max-width: 480px) {
+  .form-box {
+    padding: 15px;
+  }
+
+  .form-box h2 {
+    font-size: 20px;
+    margin-bottom: 20px;
+  }
+
+  .form-buttons button {
+    font-size: 14px;
+    padding: 10px;
+  }
+
+  .image-wrapper img {
+    width: 90px;
+    height: 90px;
+  }
 }
-
-.image-remove {
-  position: absolute;
-  top: -10px;
-  right: -10px;
-  background-color: #ff4d4d;
-  color: white;
-  border: none;
-  border-radius: 50%;
-  width: 26px;
-  height: 26px;
-  font-size: 16px;
-  cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-  transition: all 0.2s ease-in-out;
-  line-height: 26px;
-  text-align: center;
-  padding: 0;
-}
-
-.image-remove:hover {
-  background-color: #e60000;
-  transform: scale(1.1);
-}
-
-

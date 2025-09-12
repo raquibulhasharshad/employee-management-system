@@ -3,14 +3,20 @@
   font-family: sans-serif;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  margin-left: 200px; /* Shift page slightly to the right */
+  align-items: flex-start;
+
+  /* Stay right of sidebar */
+  margin-left: 230px;
   margin-top: 50px;
+
+  /* Horizontal scroll if content overflows */
+  overflow-x: auto;
+  width: calc(100% - 230px);
 }
 
 .leave-header {
   width: 100%;
-  max-width: 900px;
+  max-width: 950px; /* slightly wider */
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -32,38 +38,40 @@
   background-color: #0056b3;
 }
 
-.leave-table-container {
-  overflow-x: auto;
+/* Wrapper to make table horizontally scrollable */
+.leave-table-wrapper {
   width: 100%;
-  max-width: 900px;
+  max-width: 950px; /* slightly wider */
+  overflow-x: auto;
   margin-top: 10px;
 }
 
 .leave-table {
   width: 100%;
+  min-width: 920px; /* slightly wider than before */
   border-collapse: collapse;
   background-color: white;
   box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
   border-radius: 6px;
 }
 
-.leave-table th {
-  background-color: #f0f0f0;
-  color: #333;
-  font-weight: 600;
-  padding: 10px;
-  text-align: center;
-  border-bottom: 2px solid #ddd;
-}
-
+.leave-table th,
 .leave-table td {
   padding: 10px;
   text-align: center;
   border-bottom: 1px solid #eee;
+  white-space: nowrap; /* prevent text wrap */
+}
+
+.leave-table th {
+  background-color: #f0f0f0;
+  font-weight: 600;
+  border-bottom: 2px solid #ddd;
 }
 
 .leave-table tbody tr:hover {
   background-color: #f9f9f9;
+  cursor: pointer;
 }
 
 .no-data {
@@ -71,7 +79,3 @@
   text-align: center;
   color: #666;
 }
-
-
-
-

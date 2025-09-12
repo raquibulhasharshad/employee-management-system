@@ -44,13 +44,10 @@ const AdminSalary = () => {
     }
   };
 
-  // Unified filter function for search + year + month
   const applyFilters = (list, year, month, query) => {
     let result = [...list];
-
     if (year !== 'all') result = result.filter(s => s.month.split('-')[1] === year);
     if (month !== 'all') result = result.filter(s => s.month.split('-')[0] === month);
-
     if (query.trim()) {
       const q = query.toLowerCase();
       result = result.filter(
@@ -59,9 +56,8 @@ const AdminSalary = () => {
           s.employee?.empId.toLowerCase().includes(q)
       );
     }
-
     setFiltered(result);
-    setCurrentPage(1); // reset to first page after filter
+    setCurrentPage(1);
   };
 
   const handleSearch = (query) => {
@@ -104,7 +100,6 @@ const AdminSalary = () => {
     return defaultAvatar;
   };
 
-  // pagination calculations
   const indexOfLast = currentPage * itemsPerPage;
   const indexOfFirst = indexOfLast - itemsPerPage;
   const currentItems = filtered.slice(indexOfFirst, indexOfLast);
@@ -125,9 +120,7 @@ const AdminSalary = () => {
           <select value={selectedYear} onChange={(e) => handleYearChange(e.target.value)}>
             <option value="all">All Years</option>
             {years.map((y) => (
-              <option key={y} value={y}>
-                {y}
-              </option>
+              <option key={y} value={y}>{y}</option>
             ))}
           </select>
         </div>
@@ -137,50 +130,49 @@ const AdminSalary = () => {
           <select value={selectedMonth} onChange={(e) => handleMonthChange(e.target.value)}>
             <option value="all">All Months</option>
             {months.map((m) => (
-              <option key={m} value={m}>
-                {m}
-              </option>
+              <option key={m} value={m}>{m}</option>
             ))}
           </select>
         </div>
       </div>
 
-      <table className="salary-table">
-        <thead>
-          <tr>
-            <th>Image</th>
-            <th>Emp ID</th>
-            <th>Name</th>
-            <th>Department</th>
-            <th>Basic</th>
-            <th>Bonus</th>
-            <th>Deductions</th>
-            <th>Net</th>
-            <th>Month</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          {currentItems.map((s) => (
-            <tr key={s._id} onClick={() => setSelectedSalary(s)}>
-              <td>
-                <img src={getImageUrl(s.employee?.image)} alt="Employee" className="salary-photo" />
-              </td>
-              <td>{s.employee?.empId}</td>
-              <td>{s.employee?.name}</td>
-              <td>{s.employee?.department}</td>
-              <td>{s.basicSalary}</td>
-              <td>{s.bonus}</td>
-              <td>{s.deductions}</td>
-              <td>{s.netSalary}</td>
-              <td>{s.month}</td>
-              <td className={s.status === 'Paid' ? 'paid' : 'unpaid'}>
-                {s.status}
-              </td>
+      {/* Scrollable table container */}
+      <div className="salary-table-wrapper">
+        <table className="salary-table">
+          <thead>
+            <tr>
+              <th>Image</th>
+              <th>Emp ID</th>
+              <th>Name</th>
+              <th>Department</th>
+              <th>Basic</th>
+              <th>Bonus</th>
+              <th>Deductions</th>
+              <th>Net</th>
+              <th>Month</th>
+              <th>Status</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {currentItems.map((s) => (
+              <tr key={s._id} onClick={() => setSelectedSalary(s)}>
+                <td>
+                  <img src={getImageUrl(s.employee?.image)} alt="Employee" className="salary-photo" />
+                </td>
+                <td>{s.employee?.empId}</td>
+                <td>{s.employee?.name}</td>
+                <td>{s.employee?.department}</td>
+                <td>{s.basicSalary}</td>
+                <td>{s.bonus}</td>
+                <td>{s.deductions}</td>
+                <td>{s.netSalary}</td>
+                <td>{s.month}</td>
+                <td className={s.status === 'Paid' ? 'paid' : 'unpaid'}>{s.status}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
       {filtered.length > 0 && (
         <Footer

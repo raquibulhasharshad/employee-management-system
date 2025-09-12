@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import './Navbar.css';
 import DeleteAccountModal from './DeleteAccountModal';
-import { API_BASE_URL } from '../constants';
 
 const Navbar = ({
   isDeleteDisabled = true,
@@ -33,7 +32,6 @@ const Navbar = ({
         method: 'POST',
         credentials: 'include',
       });
-
       if (res.ok) navigate('/');
       else alert('Logout failed');
     } catch (error) {
@@ -49,7 +47,6 @@ const Navbar = ({
         credentials: 'include',
         body: JSON.stringify({ email, password }),
       });
-
       if (res.ok) {
         alert('Account and all associated data deleted.');
         navigate('/');
@@ -69,149 +66,111 @@ const Navbar = ({
         <h2>Admin Panel</h2>
         <ul>
           <li>
-            <NavLink
-              to="/dashboard"
-              className={() => (location.pathname === '/dashboard' ? 'active' : '')}
-            >
+            <NavLink to="/dashboard" className={() => (location.pathname === '/dashboard' ? 'active' : '')}>
               Dashboard
             </NavLink>
           </li>
           <li>
-            <NavLink
-              to="/dashboard/employees"
-              className={() =>
-                location.pathname.startsWith('/dashboard/employees') ? 'active' : ''
-              }
-            >
+            <NavLink to="/dashboard/employees" className={() => (location.pathname.startsWith('/dashboard/employees') ? 'active' : '')}>
               Employees
             </NavLink>
           </li>
           <li>
-            <NavLink
-              to="/dashboard/attendance"
-              className={() =>
-                location.pathname.startsWith('/dashboard/attendance') ? 'active' : ''
-              }
-            >
+            <NavLink to="/dashboard/attendance" className={() => (location.pathname.startsWith('/dashboard/attendance') ? 'active' : '')}>
               Attendance
             </NavLink>
           </li>
           <li>
-            <NavLink
-              to="/dashboard/leave"
-              className={() =>
-                location.pathname.startsWith('/dashboard/leave') ? 'active' : ''
-              }
-            >
+            <NavLink to="/dashboard/leave" className={() => (location.pathname.startsWith('/dashboard/leave') ? 'active' : '')}>
               Leave
             </NavLink>
           </li>
           <li>
-            <NavLink
-              to="/dashboard/salary"
-              className={() =>
-                location.pathname.startsWith('/dashboard/salary') ? 'active' : ''
-              }
-            >
+            <NavLink to="/dashboard/salary" className={() => (location.pathname.startsWith('/dashboard/salary') ? 'active' : '')}>
               Salary
             </NavLink>
           </li>
           <li>
-            <NavLink
-              to="/dashboard/settings"
-              className={() =>
-                location.pathname.startsWith('/dashboard/settings') ? 'active' : ''
-              }
-            >
+            <NavLink to="/dashboard/settings" className={() => (location.pathname.startsWith('/dashboard/settings') ? 'active' : '')}>
               Settings
             </NavLink>
           </li>
         </ul>
+
+        {/* --- Buttons for mobile view --- */}
+        <div className="sidebar-actions">
+          {location.pathname.startsWith('/dashboard/employees') && (
+            <>
+              <button className={`Mail ${isMailDisabled ? 'inactive' : ''}`} onClick={onMail} disabled={isMailDisabled}>
+                📧 Mail
+              </button>
+              <button className={`Del ${isDeleteDisabled ? 'inactive' : ''}`} onClick={onDelete} disabled={isDeleteDisabled}>
+                🗑️ Delete
+              </button>
+              <button className="Add" onClick={onAdd}>➕ Add New Employee</button>
+            </>
+          )}
+
+          {location.pathname.startsWith('/dashboard/salary') && (
+            <button className="Add" onClick={onAdd}>➕ Add Salary</button>
+          )}
+
+          {location.pathname.startsWith('/dashboard/leave') && (
+            <div className="leave-filters">
+              <button className={statusFilter === 'Pending' ? 'active' : ''} onClick={() => onStatusChange('Pending')}>Pending</button>
+              <button className={statusFilter === 'Approved' ? 'active' : ''} onClick={() => onStatusChange('Approved')}>Approved</button>
+              <button className={statusFilter === 'Rejected' ? 'active' : ''} onClick={() => onStatusChange('Rejected')}>Rejected</button>
+              <button className={statusFilter === 'All' ? 'active' : ''} onClick={() => onStatusChange('All')}>All</button>
+            </div>
+          )}
+
+          {location.pathname.startsWith('/dashboard/attendance') && (
+            <button className="Add" onClick={onAttendanceOpened}>📅 Open Attendance</button>
+          )}
+
+          {location.pathname.startsWith('/dashboard/settings') && (
+            <button className="DeleteAccount" onClick={() => setShowDeleteModal(true)}>🗑️ Delete Account</button>
+          )}
+
+          <button className="Logout" onClick={handleLogout}>🚪 Logout</button>
+        </div>
       </aside>
 
       <nav className="navbar">
         <div className="navbar-left">{getTitle()}</div>
+
         <div className="navbar-right">
-          {/* Employees page actions */}
+          {/* All existing buttons stay here for large screens */}
           {location.pathname.startsWith('/dashboard/employees') && (
             <div className="action-buttons">
-              <button
-                className={`Mail ${isMailDisabled ? 'inactive' : ''}`}
-                onClick={onMail}
-                disabled={isMailDisabled}
-              >
-                📧 Mail
-              </button>
-              <button
-                className={`Del ${isDeleteDisabled ? 'inactive' : ''}`}
-                onClick={onDelete}
-                disabled={isDeleteDisabled}
-              >
-                🗑️ Delete
-              </button>
-              <button className="Add" onClick={onAdd}>
-                ➕ Add New Employee
-              </button>
+              <button className={`Mail ${isMailDisabled ? 'inactive' : ''}`} onClick={onMail} disabled={isMailDisabled}>📧 Mail</button>
+              <button className={`Del ${isDeleteDisabled ? 'inactive' : ''}`} onClick={onDelete} disabled={isDeleteDisabled}>🗑️ Delete</button>
+              <button className="Add" onClick={onAdd}>➕ Add New Employee</button>
             </div>
           )}
 
-          {/* Salary page actions */}
           {location.pathname.startsWith('/dashboard/salary') && (
-            <button className="Add" onClick={onAdd}>
-              ➕ Add Salary
-            </button>
+            <button className="Add" onClick={onAdd}>➕ Add Salary</button>
           )}
 
-          {/* Leave page filters */}
           {location.pathname.startsWith('/dashboard/leave') && (
             <div className="leave-filters">
-              <button
-                className={statusFilter === 'Pending' ? 'active' : ''}
-                onClick={() => onStatusChange('Pending')}
-              >
-                Pending
-              </button>
-              <button
-                className={statusFilter === 'Approved' ? 'active' : ''}
-                onClick={() => onStatusChange('Approved')}
-              >
-                Approved
-              </button>
-              <button
-                className={statusFilter === 'Rejected' ? 'active' : ''}
-                onClick={() => onStatusChange('Rejected')}
-              >
-                Rejected
-              </button>
-              <button
-                className={statusFilter === 'All' ? 'active' : ''}
-                onClick={() => onStatusChange('All')}
-              >
-                All
-              </button>
+              <button className={statusFilter === 'Pending' ? 'active' : ''} onClick={() => onStatusChange('Pending')}>Pending</button>
+              <button className={statusFilter === 'Approved' ? 'active' : ''} onClick={() => onStatusChange('Approved')}>Approved</button>
+              <button className={statusFilter === 'Rejected' ? 'active' : ''} onClick={() => onStatusChange('Rejected')}>Rejected</button>
+              <button className={statusFilter === 'All' ? 'active' : ''} onClick={() => onStatusChange('All')}>All</button>
             </div>
           )}
 
-          {/* Attendance page actions */}
           {location.pathname.startsWith('/dashboard/attendance') && (
-            <button className="Add" onClick={onAttendanceOpened}>
-              📅 Open Attendance
-            </button>
+            <button className="Add" onClick={onAttendanceOpened}>📅 Open Attendance</button>
           )}
 
-          {/* Settings page delete account */}
           {location.pathname.startsWith('/dashboard/settings') && (
-            <button
-              className="DeleteAccount"
-              onClick={() => setShowDeleteModal(true)}
-            >
-              🗑️ Delete Account
-            </button>
+            <button className="DeleteAccount" onClick={() => setShowDeleteModal(true)}>🗑️ Delete Account</button>
           )}
 
-          <button className="Logout" onClick={handleLogout}>
-            🚪 Logout
-          </button>
+          <button className="Logout" onClick={handleLogout}>🚪 Logout</button>
         </div>
       </nav>
 

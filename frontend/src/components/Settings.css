@@ -1,20 +1,30 @@
+/* ================== PAGE CONTAINER ================== */
 .settings-container {
   max-width: 600px;
-  margin-left: 34%;
-  margin-top: 70px;
   padding: 25px;
   background-color: #fff;
   border-radius: 15px;
   box-shadow: 0 0 20px rgba(0,0,0,0.1);
   font-family: "Segoe UI", sans-serif;
+
+  /* Positioning below navbar and to the right of sidebar */
+  margin-top: 70px;       /* space for top navbar */
+  margin-left: 230px;     /* space for sidebar */
+  box-sizing: border-box;
+
+  /* Scrollable if too wide */
+  overflow-x: auto;
+  white-space: nowrap;
 }
 
+/* ================== HEADING ================== */
 .settings-container h2 {
   text-align: center;
   margin-bottom: 25px;
   color: #333;
 }
 
+/* ================== FORM GROUP ================== */
 .form-group {
   margin-bottom: 20px;
 }
@@ -31,8 +41,10 @@
   border: 1px solid #ccc;
   border-radius: 8px;
   font-size: 15px;
+  min-width: 200px; /* ensure input doesn't shrink too much */
 }
 
+/* ================== BUTTONS ================== */
 .settings-buttons {
   display: flex;
   justify-content: space-between;
@@ -45,7 +57,7 @@
 .save-btn,
 .cancel-btn,
 .change-password-btn {
-  flex: 1;
+  flex: 1; /* stretch buttons equally on small screens */
   padding: 10px 15px;
   border: none;
   border-radius: 8px;
@@ -54,26 +66,12 @@
   font-size: 15px;
 }
 
-.edit-btn {
-  background-color: #007bff;
-  color: white;
-}
+.edit-btn { background-color: #007bff; color: white; }
+.save-btn { background-color: #28a745; color: white; }
+.cancel-btn { background-color: #dc3545; color: white; }
+.change-password-btn { background-color: #6f42c1; color: white; }
 
-.save-btn {
-  background-color: #28a745;
-  color: white;
-}
-
-.cancel-btn {
-  background-color: #dc3545;
-  color: white;
-}
-
-.change-password-btn {
-  background-color: #6f42c1;
-  color: white;
-}
-
+/* ================== PASSWORD MODAL ================== */
 .password-modal {
   margin-top: 40px;
   padding: 25px;
@@ -82,6 +80,7 @@
   background-color: #f8f9fa;
 }
 
+/* ================== MESSAGES ================== */
 .error-message {
   color: red;
   font-size: 14px;

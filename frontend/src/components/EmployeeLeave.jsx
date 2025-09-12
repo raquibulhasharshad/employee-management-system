@@ -67,34 +67,45 @@ const EmployeeLeave = () => {
         <div className="leave-header">
           <h2>My Leave Requests</h2>
         </div>
-        <table className="leave-table">
-          <thead>
-            <tr>
-              <th>S.No</th>
-              <th>Leave Type</th>
-              <th>From</th>
-              <th>To</th>
-              <th>Applied On</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {currentLeaves.map((leave, index) => (
-              <tr 
-                key={leave._id} 
-                onClick={() => handleRowClick(leave)} 
-                style={{ cursor: 'pointer' }}
-              >
-                <td>{indexOfFirstLeave + index + 1}</td>
-                <td>{leave.leaveType}</td>
-                <td>{formatDate(leave.fromDate)}</td>
-                <td>{formatDate(leave.toDate)}</td>
-                <td>{formatDate(leave.appliedAt)}</td>
-                <td>{leave.status}</td>
+
+        <div className="leave-table-wrapper">
+          <table className="leave-table">
+            <thead>
+              <tr>
+                <th>S.No</th>
+                <th>Leave Type</th>
+                <th>From</th>
+                <th>To</th>
+                <th>Applied On</th>
+                <th>Status</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {currentLeaves.length > 0 ? (
+                currentLeaves.map((leave, index) => (
+                  <tr
+                    key={leave._id}
+                    onClick={() => handleRowClick(leave)}
+                    className="clickable-row"
+                  >
+                    <td>{indexOfFirstLeave + index + 1}</td>
+                    <td>{leave.leaveType}</td>
+                    <td>{formatDate(leave.fromDate)}</td>
+                    <td>{formatDate(leave.toDate)}</td>
+                    <td>{formatDate(leave.appliedAt)}</td>
+                    <td>{leave.status}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="6" className="no-data">
+                    No leave records found
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
 
         <Footer
           totalPages={totalPages}

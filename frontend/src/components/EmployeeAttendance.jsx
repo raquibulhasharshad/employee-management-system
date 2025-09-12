@@ -10,7 +10,6 @@ const EmployeeAttendance = () => {
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
 
-  // ✅ Default to current month/year
   const currentDate = new Date();
   const defaultMonth = (currentDate.getMonth() + 1).toString().padStart(2, "0");
   const defaultYear = currentDate.getFullYear().toString();
@@ -26,15 +25,11 @@ const EmployeeAttendance = () => {
 
   const fetchAttendance = async () => {
     try {
-      const res = await fetch(`${API_BASE_URL}/attendance/my`, {
-        credentials: "include",
-      });
+      const res = await fetch(`${API_BASE_URL}/attendance/my`, { credentials: "include" });
       const data = await res.json();
 
       const today = new Date().toLocaleDateString("en-CA");
-
       const filteredData = data.filter((rec) => rec.date <= today);
-
       filteredData.sort((a, b) => new Date(a.date) - new Date(b.date));
 
       setAttendance(filteredData);
@@ -76,7 +71,6 @@ const EmployeeAttendance = () => {
   const today = new Date().toLocaleDateString("en-CA");
   const todayRecord = attendance.find((rec) => rec.date === today);
 
-  // ✅ Apply month/year filters
   const filteredAttendance = attendance.filter((rec) => {
     const recDate = new Date(rec.date);
     const recMonth = (recDate.getMonth() + 1).toString().padStart(2, "0");
@@ -88,17 +82,13 @@ const EmployeeAttendance = () => {
     );
   });
 
-  // Pagination
   const totalRecords = filteredAttendance.length;
   const totalPages = Math.ceil(totalRecords / recordsPerPage);
   const indexOfLast = currentPage * recordsPerPage;
   const indexOfFirst = indexOfLast - recordsPerPage;
   const currentRecords = filteredAttendance.slice(indexOfFirst, indexOfLast);
 
-  // Extract available years dynamically
-  const availableYears = [
-    ...new Set(attendance.map((rec) => new Date(rec.date).getFullYear())),
-  ];
+  const availableYears = [...new Set(attendance.map((rec) => new Date(rec.date).getFullYear()))];
 
   return (
     <>
@@ -127,9 +117,7 @@ const EmployeeAttendance = () => {
                 const month = (i + 1).toString().padStart(2, "0");
                 return (
                   <option key={month} value={month}>
-                    {new Date(0, i).toLocaleString("default", {
-                      month: "long",
-                    })}
+                    {new Date(0, i).toLocaleString("default", { month: "long" })}
                   </option>
                 );
               })}
@@ -155,42 +143,42 @@ const EmployeeAttendance = () => {
           </label>
         </div>
 
-        <table className="employee-attendance-table">
-          <thead>
-            <tr>
-              <th>S.No</th>
-              <th>Date</th>
-              <th>Check-in</th>
-              <th>Check-out</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {currentRecords.length > 0 ? (
-              currentRecords.map((rec, index) => (
-                <tr
-                  key={rec._id}
-                  onClick={() => setSelectedRecord(rec)}
-                  className={`clickable-row ${
-                    rec.date === today ? "today-record" : ""
-                  }`}
-                >
-                  <td>{indexOfFirst + index + 1}</td>
-                  <td>{rec.date}</td>
-                  <td>{rec.checkIn || "-"}</td>
-                  <td>{rec.checkOut || "-"}</td>
-                  <td>{rec.status}</td>
-                </tr>
-              ))
-            ) : (
+        <div className="table-wrapper">
+          <table className="employee-attendance-table">
+            <thead>
               <tr>
-                <td colSpan="5" className="no-data">
-                  No attendance records found
-                </td>
+                <th>S.No</th>
+                <th>Date</th>
+                <th>Check-in</th>
+                <th>Check-out</th>
+                <th>Status</th>
               </tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {currentRecords.length > 0 ? (
+                currentRecords.map((rec, index) => (
+                  <tr
+                    key={rec._id}
+                    onClick={() => setSelectedRecord(rec)}
+                    className={`clickable-row ${rec.date === today ? "today-record" : ""}`}
+                  >
+                    <td>{indexOfFirst + index + 1}</td>
+                    <td>{rec.date}</td>
+                    <td>{rec.checkIn || "-"}</td>
+                    <td>{rec.checkOut || "-"}</td>
+                    <td>{rec.status}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="5" className="no-data">
+                    No attendance records found
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
 
         {totalRecords > 0 && (
           <Footer
