@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import './Auth.css';
+import { API_BASE_URL } from "../constants";
 
 const EmployeeLogin = () => {
   const [email, setEmail] = useState('');
@@ -18,7 +19,7 @@ const EmployeeLogin = () => {
     }
 
     try {
-      const res = await fetch('http://localhost:5000/api/employee/auth/login', {
+      const res = await fetch(`${API_BASE_URL}/employee/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

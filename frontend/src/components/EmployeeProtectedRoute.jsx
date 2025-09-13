@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
+import { API_BASE_URL } from '../constants';
 
 const EmployeeProtectedRoute = ({ children }) => {
   const [auth, setAuth] = useState({ checked: false, loggedIn: false });
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/employee/auth/check', {
+    fetch(`${API_BASE_URL}/employee/auth/check`, {
       credentials: 'include',
       cache: 'no-store',
     })

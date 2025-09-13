@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import './Navbar.css';
 import DeleteAccountModal from './DeleteAccountModal';
+import { API_BASE_URL } from '../constants';
 
 const Navbar = ({
   isDeleteDisabled = true,
@@ -28,7 +29,7 @@ const Navbar = ({
 
   const handleLogout = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/auth/logout', {
+      const res = await fetch(`${API_BASE_URL}/auth/logout`, {
         method: 'POST',
         credentials: 'include',
       });

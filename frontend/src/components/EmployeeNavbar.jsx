@@ -1,6 +1,7 @@
 import React from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import './Navbar.css';
+import { API_BASE_URL } from '../constants';
 
 const EmployeeNavbar = ({ onAddLeave = () => {}, onCheckIn, onCheckOut, todayRecord }) => {
   const location = useLocation();
@@ -18,7 +19,7 @@ const EmployeeNavbar = ({ onAddLeave = () => {}, onCheckIn, onCheckOut, todayRec
 
   const handleLogout = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/employee/auth/logout', {
+      const res = await fetch(`${API_BASE_URL}/employee/auth/logout`, {
         method: 'POST',
         credentials: 'include',
       });

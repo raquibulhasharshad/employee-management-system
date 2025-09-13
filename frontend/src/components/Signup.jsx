@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import './Auth.css';
-
+import { API_BASE_URL } from "../constants";
 const Signup = () => {
   const navigate = useNavigate();
 
@@ -28,7 +28,7 @@ const Signup = () => {
     if (password.length < 6) return setError("Password must be at least 6 characters.");
     if (password !== confirmPassword) return setError("Passwords do not match.");
 
-    fetch("http://localhost:5000/api/auth/signup", {
+    fetch(`${API_BASE_URL}/auth/signup`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ adminName, companyName, email, phone, address, password })

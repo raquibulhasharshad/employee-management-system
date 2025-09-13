@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./EmployeeSettings.css";
+import { API_BASE_URL } from "../constants";
 
 const EmployeeSettings = () => {
   const [form, setForm] = useState({
@@ -32,7 +33,7 @@ const EmployeeSettings = () => {
     }
 
     try {
-      const res = await fetch("http://localhost:5000/api/employee/auth/change-password", {
+      const res = await fetch(`${API_BASE_URL}/employee/auth/change-password`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "include",

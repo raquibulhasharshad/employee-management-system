@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import './Mail.css';
+import { API_BASE_URL } from '../constants';
 
 const Mail = ({ isOpen, onClose, toEmails, OnSend }) => {
   const [subject, setSubject] = useState('');
@@ -24,7 +25,7 @@ const Mail = ({ isOpen, onClose, toEmails, OnSend }) => {
     setIsSending(true);
 
     try {
-      const res = await fetch("http://localhost:5000/api/mail/send", {
+      const res = await fetch(`${API_BASE_URL}/mail/send`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
