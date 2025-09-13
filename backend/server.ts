@@ -19,9 +19,17 @@ const app: express.Application = express();
 const port: number = process.env.PORT ? parseInt(process.env.PORT) : 5000;
 const hostname: string = process.env.HOSTNAME || '0.0.0.0';
 
-// ✅ CORS configuration
+// ✅ CORS configuration with local and production frontend URLs
+const allowedOrigins = [
+  'http://localhost:5173', // Local frontend
+  'https://employee-management-system-1-70ud.onrender.com' // Production frontend
+];
+
 app.use(cors({
-  origin: 'http://localhost:5173', // Change this to your frontend domain when deployed
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) callback(null, true);
+    else callback(new Error('Not allowed by CORS'));
+  },
   credentials: true
 }));
 
