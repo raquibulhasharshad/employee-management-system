@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 
-const EMPLOYEE_SECRET = "employee$auth123";
+// Use environment variable with fallback
+const EMPLOYEE_SECRET = process.env.JWT_SECRET_EMPLOYEE || "employee$auth123";
 
 function setEmployeeToken(employee: any) {
   const payload = {

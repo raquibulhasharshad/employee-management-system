@@ -1,7 +1,8 @@
 import { Request, Response, NextFunction, RequestHandler } from "express";
 import jwt, { JwtPayload } from "jsonwebtoken";
 
-const secret = "empmanagsys$123@&";
+// Use environment variable for secret
+const secret = process.env.JWT_SECRET_ADMIN || "empmanagsys$123@&";
 
 const restrictToLoggedinUserOnly: RequestHandler = (
   req: Request,
@@ -22,7 +23,6 @@ const restrictToLoggedinUserOnly: RequestHandler = (
       res.status(401).json({ message: "Unauthorized: Invalid token payload" });
       return;
     }
-
 
     (req as any).user = {
       id: decoded.id,

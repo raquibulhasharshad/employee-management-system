@@ -2,7 +2,8 @@ import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import Employee from "../model/employeeModel"; // ✅ Make sure this path is correct
 
-const EMPLOYEE_SECRET = "employee$auth123";
+// Use environment variable for employee JWT secret
+const EMPLOYEE_SECRET = process.env.JWT_SECRET_EMPLOYEE || "employee$auth123";
 
 const restrictToEmployeeOnly = async (
   req: Request,
