@@ -18,13 +18,10 @@ const app: express.Application = express();
 const hostname = '127.0.0.1';
 const port = 5000;
 
-
 app.use(cors({
   origin: 'http://localhost:5173',
   credentials: true
 }));
-
-
 
 app.use((req, res, next) => {
   res.setHeader('Cache-Control', 'no-store');
@@ -42,9 +39,12 @@ app.use("/api/salary", salaryRoutes);
 app.use("/api/attendance", attendanceRoutes);
 app.use("/api/mail", mailRoutes);
 
-mongoose.connect('mongodb://127.0.0.1:27017/employeedb')
-  .then(() => console.log('MongoDB connected'))
-  .catch(err => console.error('MongoDB connection error:', err));
+// ✅ Atlas connection string
+const atlasUri = `mongodb+srv://raquibulhasharshad_dbuser:${process.env.MONGO_PASSWORD}@cluster0.1p2hyyf.mongodb.net/employeedb?retryWrites=true&w=majority`;
+
+mongoose.connect(atlasUri)
+  .then(() => console.log('MongoDB Atlas connected'))
+  .catch(err => console.error('MongoDB Atlas connection error:', err));
 
 app.listen(port, hostname, () => {
   console.log(`Server running at http://${hostname}:${port}`);
