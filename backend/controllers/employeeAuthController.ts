@@ -14,7 +14,13 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-const handleEmployeeLogin = async (req: express.Request, res: express.Response): Promise<void> => {
+const isProduction = process.env.NODE_ENV === "production";
+
+/* -------------------- LOGIN -------------------- */
+const handleEmployeeLogin = async (
+  req: express.Request,
+  res: express.Response
+): Promise<void> => {
   try {
     const { email, password } = req.body;
     const employee = await Employee.findOne({ email });
@@ -31,11 +37,12 @@ const handleEmployeeLogin = async (req: express.Request, res: express.Response):
     }
 
     const token = employeeAuthService.setEmployeeToken(employee);
+
     res.cookie("eid", token, {
       httpOnly: true,
-      sameSite: "lax",
-      secure: false,
-      maxAge: 2 * 60 * 60 * 1000,
+      secure: isProduction, // true only over https
+      sameSite: isProduction ? "none" : "lax",
+      maxAge: 2 * 60 * 60 * 1000, // 2h
     });
 
     res.status(200).json({ message: "Login successful" });
@@ -44,7 +51,11 @@ const handleEmployeeLogin = async (req: express.Request, res: express.Response):
   }
 };
 
-const handleEmployeeLogout = async (req: express.Request, res: express.Response): Promise<void> => {
+/* -------------------- LOGOUT -------------------- */
+const handleEmployeeLogout = async (
+  req: express.Request,
+  res: express.Response
+): Promise<void> => {
   try {
     res.clearCookie("eid");
     res.status(200).json({ message: "Logout successful" });
@@ -53,7 +64,11 @@ const handleEmployeeLogout = async (req: express.Request, res: express.Response)
   }
 };
 
-const handleEmployeeAuthCheck = async (req: express.Request, res: express.Response): Promise<void> => {
+/* -------------------- AUTH CHECK -------------------- */
+const handleEmployeeAuthCheck = async (
+  req: express.Request,
+  res: express.Response
+): Promise<void> => {
   try {
     const token = req.cookies?.eid;
     if (!token) {
@@ -73,7 +88,11 @@ const handleEmployeeAuthCheck = async (req: express.Request, res: express.Respon
   }
 };
 
-const handleEmployeeChangePassword = async (req: express.Request, res: express.Response): Promise<void> => {
+/* -------------------- CHANGE PASSWORD -------------------- */
+const handleEmployeeChangePassword = async (
+  req: express.Request,
+  res: express.Response
+): Promise<void> => {
   try {
     const empId = (req as any).user.id;
     const { currentPassword, newPassword, confirmPassword } = req.body;
@@ -95,8 +114,7 @@ const handleEmployeeChangePassword = async (req: express.Request, res: express.R
       return;
     }
 
-    const hashed = await bcrypt.hash(newPassword, 10);
-    employee.password = hashed;
+    employee.password = await bcrypt.hash(newPassword, 10);
     await employee.save();
 
     res.status(200).json({ message: "Password updated" });
@@ -105,7 +123,11 @@ const handleEmployeeChangePassword = async (req: express.Request, res: express.R
   }
 };
 
-const handleGetEmployeeDetails = async (req: express.Request, res: express.Response): Promise<void> => {
+/* -------------------- GET DETAILS -------------------- */
+const handleGetEmployeeDetails = async (
+  req: express.Request,
+  res: express.Response
+): Promise<void> => {
   try {
     const userId = (req as any).user.id;
     const employee = await Employee.findById(userId).select("-password");
@@ -117,13 +139,17 @@ const handleGetEmployeeDetails = async (req: express.Request, res: express.Respo
 
     res.status(200).json(employee);
   } catch (error) {
-    res.status(500).json({ message: "Failed to fetch Employee details", error });
+    res
+      .status(500)
+      .json({ message: "Failed to fetch Employee details", error });
   }
 };
 
-// ------------------- Forgot Password (Employee) -------------------
-
-const handleEmployeeForgotPassword = async (req: express.Request, res: express.Response) => {
+/* -------------------- FORGOT PASSWORD -------------------- */
+const handleEmployeeForgotPassword = async (
+  req: express.Request,
+  res: express.Response
+) => {
   try {
     const { email } = req.body;
     const employee = await Employee.findOne({ email });
@@ -148,7 +174,11 @@ const handleEmployeeForgotPassword = async (req: express.Request, res: express.R
   }
 };
 
-const handleEmployeeResetPassword = async (req: express.Request, res: express.Response) => {
+/* -------------------- RESET PASSWORD -------------------- */
+const handleEmployeeResetPassword = async (
+  req: express.Request,
+  res: express.Response
+) => {
   try {
     const { email, otp, newPassword } = req.body;
     const record = otpStore[email];
@@ -181,5 +211,5 @@ export {
   handleEmployeeChangePassword,
   handleGetEmployeeDetails,
   handleEmployeeForgotPassword,
-  handleEmployeeResetPassword
+  handleEmployeeResetPassword,
 };
