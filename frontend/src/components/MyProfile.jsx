@@ -27,13 +27,14 @@ const MyProfile = () => {
     fetchProfile();
   }, []);
 
+  // ✅ Handles Cloudinary / external URLs robustly
   const getImageUrl = (img) => {
-    if (img) {
-      return img.startsWith('/uploads')
-        ? `${API_BASE_URL.replace('/api', '')}${img}`
-        : img;
+    if (!img) {
+      return 'https://static.vecteezy.com/system/resources/thumbnails/009/292/244/small_2x/default-avatar-icon-of-social-media-user-vector.jpg';
     }
-    return 'https://static.vecteezy.com/system/resources/thumbnails/009/292/244/small_2x/default-avatar-icon-of-social-media-user-vector.jpg';
+    if (img.startsWith('http')) return img; // external URL / Cloudinary
+    if (img.startsWith('/uploads')) return `${API_BASE_URL.replace('/api', '')}${img}`;
+    return img; // fallback
   };
 
   if (!employee) {
@@ -47,7 +48,7 @@ const MyProfile = () => {
         <img
           className="profile-image"
           src={getImageUrl(employee.image)}
-          alt={employee.name}
+          alt={employee.name || 'Employee'}
         />
         <div className="profile-details">
           <p><strong>Name:</strong> {employee.name}</p>

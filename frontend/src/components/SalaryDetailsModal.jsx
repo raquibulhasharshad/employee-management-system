@@ -112,12 +112,13 @@ const SalaryDetailsModal = ({ salary, onClose, onStatusChange }) => {
     }
   };
 
-  const getImageUrl = (img) =>
-    !img
-      ? defaultAvatar
-      : img.startsWith('/uploads')
-      ? `${API_BASE_URL.replace('/api', '')}${img}`
-      : img;
+  // ✅ Robust image URL handling for Cloudinary / external URLs
+  const getImageUrl = (img) => {
+    if (!img) return defaultAvatar;
+    if (img.startsWith('http')) return img; // Cloudinary/external URL
+    if (img.startsWith('/uploads')) return `${API_BASE_URL.replace('/api', '')}${img}`;
+    return img; // fallback
+  };
 
   return (
     <div className="modal-overlay">
@@ -129,7 +130,7 @@ const SalaryDetailsModal = ({ salary, onClose, onStatusChange }) => {
             <div className="employee-preview">
               <img
                 src={getImageUrl(employee.image)}
-                alt="Employee"
+                alt={employee.name || 'Employee'}
                 className="employee-img"
               />
               <div className="employee-info">

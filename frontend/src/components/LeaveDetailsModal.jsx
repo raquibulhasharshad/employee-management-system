@@ -25,11 +25,14 @@ const LeaveDetailsModal = ({ leave, onClose, onStatusChange }) => {
     }
   };
 
+  // ✅ Cloudinary / external image handling
   const getImageUrl = (img) => {
     if (!img) {
       return 'https://static.vecteezy.com/system/resources/thumbnails/009/292/244/small_2x/default-avatar-icon-of-social-media-user-vector.jpg';
     }
-    return img.startsWith('/uploads') ? `${API_BASE_URL.replace('/api', '')}${img}` : img;
+    if (img.startsWith('http')) return img; // Cloudinary or external URL
+    if (img.startsWith('/uploads')) return `${API_BASE_URL.replace('/api', '')}${img}`;
+    return img;
   };
 
   const formatDate = (date) => {
@@ -63,7 +66,6 @@ const LeaveDetailsModal = ({ leave, onClose, onStatusChange }) => {
   const days = calculateDays(startRaw, endRaw);
   const image = getImageUrl(leave.image || employee.image);
 
-  // ✅ check if leave status is already finalized
   const isFinalized = leave.status === 'Approved' || leave.status === 'Rejected';
 
   return (
@@ -112,7 +114,6 @@ const LeaveDetailsModal = ({ leave, onClose, onStatusChange }) => {
           <button className="Close" onClick={onClose}>Close</button>
         </div>
 
-        {/* ✅ Show message if already approved/rejected */}
         {isFinalized && (
           <p className={`status-note ${leave.status}`}>
             This leave has already been {leave.status}.

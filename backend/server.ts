@@ -18,7 +18,6 @@ const app: express.Application = express();
 const hostname = '127.0.0.1';
 const port = 5000;
 
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 app.use(cors({
   origin: 'http://localhost:5173',

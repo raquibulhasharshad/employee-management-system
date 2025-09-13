@@ -21,6 +21,7 @@ const AddEmployeeForm = ({ onSave, onCancel, editingData }) => {
   const [previewUrl, setPreviewUrl] = useState('');
   const [errors, setErrors] = useState({});
   const [existingEmployees, setExistingEmployees] = useState([]);
+  const [isSaving, setIsSaving] = useState(false); // Added
 
   useEffect(() => {
     const fetchExisting = async () => {
@@ -42,9 +43,7 @@ const AddEmployeeForm = ({ onSave, onCancel, editingData }) => {
       setFormData(prev => ({ ...prev, ...rest, image: null, removeImage: false }));
 
       if (image) {
-        const imageUrl = image.startsWith('/uploads')
-          ? `${API_BASE_URL.replace('/api', '')}${image}`
-          : image;
+        const imageUrl = image.startsWith('http') ? image : `${API_BASE_URL.replace('/api', '')}${image}`;
         setPreviewUrl(imageUrl);
       } else {
         setPreviewUrl('');
@@ -54,12 +53,12 @@ const AddEmployeeForm = ({ onSave, onCancel, editingData }) => {
     }
   }, [editingData]);
 
-  const handleInputChange = (e) => {
+  const handleInputChange = e => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleFileChange = (e) => {
+  const handleFileChange = e => {
     const file = e.target.files[0];
     if (file) {
       setFormData(prev => ({ ...prev, image: file, removeImage: false }));
@@ -99,21 +98,20 @@ const AddEmployeeForm = ({ onSave, onCancel, editingData }) => {
     if (!formData.gender) newErrors.gender = 'Gender is required';
     if (!formData.dob) newErrors.dob = 'Date of Birth is required';
 
-    // Custom validation
     const emailConflict = existingEmployees.find(emp =>
       emp.email === formData.email &&
       emp.id !== editingData?.id
     );
 
     if (emailConflict) {
-      newErrors.email = (emailConflict.admin === editingData?.admin)
+      newErrors.email = (emailConflict.createdBy === editingData?.createdBy)
         ? 'Employee email ID already exists for this admin'
         : 'Email ID already exists for some other company';
     }
 
     const empIdConflict = existingEmployees.find(emp =>
       emp.empId === formData.empId &&
-      emp.admin === editingData?.admin &&
+      emp.createdBy === editingData?.createdBy &&
       emp.id !== editingData?.id
     );
 
@@ -124,7 +122,7 @@ const AddEmployeeForm = ({ onSave, onCancel, editingData }) => {
     return newErrors;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
     const errs = validate();
     if (Object.keys(errs).length > 0) {
@@ -132,20 +130,19 @@ const AddEmployeeForm = ({ onSave, onCancel, editingData }) => {
       return;
     }
 
+    setIsSaving(true); // Start saving
+
     const formDataToSend = new FormData();
     for (const key in formData) {
       if (formData[key] !== null && key !== 'removeImage') {
         formDataToSend.append(key, formData[key]);
       }
     }
-    if (formData.removeImage) {
-      formDataToSend.append('removeImage', 'true');
-    }
-    if (editingData) {
-      formDataToSend.append('id', editingData.id);
-    }
+    if (formData.removeImage) formDataToSend.append('removeImage', 'true');
+    if (editingData) formDataToSend.append('id', editingData.id);
 
-    onSave(formDataToSend, !!editingData);
+    await onSave(formDataToSend, !!editingData); // Wait for save
+    setIsSaving(false); // Stop saving
   };
 
   return (
@@ -175,96 +172,44 @@ const AddEmployeeForm = ({ onSave, onCancel, editingData }) => {
           </div>
 
           <div>
-            <input
-              type="text"
-              name="name"
-              placeholder="Name"
-              value={formData.name}
-              onChange={handleInputChange}
-            />
+            <input type="text" name="name" placeholder="Name" value={formData.name} onChange={handleInputChange} />
             {errors.name && <p className="error">{errors.name}</p>}
           </div>
 
           <div>
-            <input
-              type="text"
-              name="email"
-              placeholder="Email"
-              value={formData.email}
-              onChange={handleInputChange}
-            />
+            <input type="text" name="email" placeholder="Email" value={formData.email} onChange={handleInputChange} />
             {errors.email && <p className="error">{errors.email}</p>}
           </div>
 
           <div>
-            <input
-              type="text"
-              name="phone"
-              placeholder="Phone"
-              value={formData.phone}
-              onChange={handleInputChange}
-            />
+            <input type="text" name="phone" placeholder="Phone" value={formData.phone} onChange={handleInputChange} />
             {errors.phone && <p className="error">{errors.phone}</p>}
           </div>
 
           <div>
-            <input
-              type="text"
-              name="empId"
-              placeholder="Employee ID"
-              value={formData.empId}
-              onChange={handleInputChange}
-            />
+            <input type="text" name="empId" placeholder="Employee ID" value={formData.empId} onChange={handleInputChange} />
             {errors.empId && <p className="error">{errors.empId}</p>}
           </div>
 
           <div>
-            <input
-              type="text"
-              name="address"
-              placeholder="Address"
-              value={formData.address}
-              onChange={handleInputChange}
-            />
+            <input type="text" name="address" placeholder="Address" value={formData.address} onChange={handleInputChange} />
             {errors.address && <p className="error">{errors.address}</p>}
           </div>
 
           <div>
-            <input
-              type="text"
-              name="department"
-              placeholder="Department"
-              value={formData.department}
-              onChange={handleInputChange}
-            />
+            <input type="text" name="department" placeholder="Department" value={formData.department} onChange={handleInputChange} />
             {errors.department && <p className="error">{errors.department}</p>}
           </div>
 
           <div>
-            <input
-              type="text"
-              name="position"
-              placeholder="Position"
-              value={formData.position}
-              onChange={handleInputChange}
-            />
+            <input type="text" name="position" placeholder="Position" value={formData.position} onChange={handleInputChange} />
             {errors.position && <p className="error">{errors.position}</p>}
           </div>
 
-          <input
-            type="text"
-            name="skills"
-            placeholder="Skills"
-            value={formData.skills}
-            onChange={handleInputChange}
-          />
+          <input type="text" name="skills" placeholder="Skills" value={formData.skills} onChange={handleInputChange} />
 
           <div>
-            <select
-              name="gender"
-              value={formData.gender}
-              onChange={handleInputChange}
-            >
+            <select name="gender" value={formData.gender} onChange={handleInputChange}>
               <option value="">Select Gender</option>
               <option value="Male">Male</option>
               <option value="Female">Female</option>
@@ -274,21 +219,16 @@ const AddEmployeeForm = ({ onSave, onCancel, editingData }) => {
           </div>
 
           <div>
-            <input
-              type="date"
-              name="dob"
-              value={formData.dob}
-              onChange={handleInputChange}
-            />
+            <input type="date" name="dob" value={formData.dob} onChange={handleInputChange} />
             {errors.dob && <p className="error">{errors.dob}</p>}
           </div>
         </div>
 
         <div className="form-buttons">
-          <button type="submit">Save</button>
-          <button type="button" className="cancel" onClick={onCancel}>
-            Cancel
+          <button type="submit" disabled={isSaving}>
+            {isSaving ? 'Saving...' : 'Save'}
           </button>
+          <button type="button" className="cancel" onClick={onCancel}>Cancel</button>
         </div>
       </form>
     </div>

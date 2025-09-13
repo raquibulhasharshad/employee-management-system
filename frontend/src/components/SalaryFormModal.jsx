@@ -18,6 +18,7 @@ const SalaryFormModal = ({ onClose, onSuccess }) => {
   const defaultAvatar =
     'https://static.vecteezy.com/system/resources/thumbnails/009/292/244/small_2x/default-avatar-icon-of-social-media-user-vector.jpg';
 
+  // Fetch employees on mount
   useEffect(() => {
     const fetchEmployees = async () => {
       try {
@@ -25,7 +26,7 @@ const SalaryFormModal = ({ onClose, onSuccess }) => {
           credentials: 'include',
         });
         const data = await res.json();
-        setEmployees(data);
+        setEmployees(data || []);
       } catch (err) {
         console.error('Failed to fetch employees:', err);
       }
@@ -33,6 +34,7 @@ const SalaryFormModal = ({ onClose, onSuccess }) => {
     fetchEmployees();
   }, []);
 
+  // Update selected employee when employeeId changes
   useEffect(() => {
     const emp = employees.find(
       (e) => e._id === form.employeeId || e.id === form.employeeId
@@ -51,11 +53,10 @@ const SalaryFormModal = ({ onClose, onSuccess }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // ✅ Convert "YYYY-MM" → "MM-YYYY"
     let formattedMonth = '';
     if (form.month) {
-      const [year, month] = form.month.split('-'); // "2025-08"
-      formattedMonth = `${month}-${year}`; // "08-2025"
+      const [year, month] = form.month.split('-');
+      formattedMonth = `${month}-${year}`;
     }
 
     try {
@@ -65,7 +66,7 @@ const SalaryFormModal = ({ onClose, onSuccess }) => {
         bonus: Number(form.bonus),
         deductions: Number(form.deductions),
         netSalary,
-        month: formattedMonth, // ✅ send formatted month
+        month: formattedMonth,
       };
 
       const res = await fetch(`${API_BASE_URL}/salary/add`, {
@@ -88,12 +89,12 @@ const SalaryFormModal = ({ onClose, onSuccess }) => {
     }
   };
 
-  const getImageUrl = (img) =>
-    !img
-      ? defaultAvatar
-      : img.startsWith('/uploads')
-      ? `${API_BASE_URL.replace('/api', '')}${img}`
-      : img;
+  const getImageUrl = (img) => {
+    if (!img) return defaultAvatar;
+    if (img.startsWith('http')) return img;
+    if (img.startsWith('/uploads')) return `${API_BASE_URL.replace('/api', '')}${img}`;
+    return img;
+  };
 
   return (
     <div className="modal-overlay">
@@ -119,26 +120,15 @@ const SalaryFormModal = ({ onClose, onSuccess }) => {
             <div className="employee-preview">
               <img
                 src={getImageUrl(selectedEmployee.image)}
-                alt="Employee"
+                alt={selectedEmployee.name || 'Employee'}
                 className="employee-img"
               />
               <div className="employee-info">
-                <p>
-                  <strong>Name:</strong> {selectedEmployee.name}
-                </p>
-                <p>
-                  <strong>Emp ID:</strong> {selectedEmployee.empId}
-                </p>
-                <p>
-                  <strong>Email:</strong> {selectedEmployee.email || 'N/A'}
-                </p>
-                <p>
-                  <strong>Phone:</strong> {selectedEmployee.phone || 'N/A'}
-                </p>
-                <p>
-                  <strong>Department:</strong>{' '}
-                  {selectedEmployee.department || 'N/A'}
-                </p>
+                <p><strong>Name:</strong> {selectedEmployee.name}</p>
+                <p><strong>Emp ID:</strong> {selectedEmployee.empId}</p>
+                <p><strong>Email:</strong> {selectedEmployee.email || 'N/A'}</p>
+                <p><strong>Phone:</strong> {selectedEmployee.phone || 'N/A'}</p>
+                <p><strong>Department:</strong> {selectedEmployee.department || 'N/A'}</p>
               </div>
             </div>
           )}
@@ -188,9 +178,7 @@ const SalaryFormModal = ({ onClose, onSuccess }) => {
 
           <div className="modal-actions">
             <button type="submit">Add Salary</button>
-            <button type="button" onClick={onClose}>
-              Close
-            </button>
+            <button type="button" onClick={onClose}>Close</button>
           </div>
         </form>
       </div>

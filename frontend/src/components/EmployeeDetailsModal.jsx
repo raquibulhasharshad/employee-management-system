@@ -17,11 +17,12 @@ const EmployeeDetailsModal = ({ employee, onClose }) => {
     image,
   } = employee;
 
+  // Updated image URL handling for Cloudinary
   const getImageUrl = (img) => {
     if (img) {
-      return img.startsWith('/uploads')
-        ? `${API_BASE_URL.replace('/api', '')}${img}`
-        : img;
+      if (img.startsWith('http')) return img; // Cloudinary or external URL
+      if (img.startsWith('/uploads')) return `${API_BASE_URL.replace('/api', '')}${img}`;
+      return img; // fallback
     }
     return 'https://static.vecteezy.com/system/resources/thumbnails/009/292/244/small_2x/default-avatar-icon-of-social-media-user-vector.jpg';
   };

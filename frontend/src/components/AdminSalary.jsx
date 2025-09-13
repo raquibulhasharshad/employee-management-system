@@ -95,8 +95,13 @@ const AdminSalary = () => {
     }
   };
 
+  // Updated image URL handling for Cloudinary
   const getImageUrl = (img) => {
-    if (img) return img.startsWith('/uploads') ? `${API_BASE_URL.replace('/api', '')}${img}` : img;
+    if (img) {
+      if (img.startsWith('http')) return img; // Cloudinary URL
+      if (img.startsWith('/uploads')) return `${API_BASE_URL.replace('/api', '')}${img}`;
+      return img; // fallback
+    }
     return defaultAvatar;
   };
 
@@ -136,7 +141,6 @@ const AdminSalary = () => {
         </div>
       </div>
 
-      {/* Scrollable table container */}
       <div className="salary-table-wrapper">
         <table className="salary-table">
           <thead>

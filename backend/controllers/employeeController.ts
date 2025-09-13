@@ -1,11 +1,10 @@
 import express from "express";
-import path from "path";
-import fs from "fs";
 import bcrypt from "bcrypt";
 import Employee from "../model/employeeModel";
 import Salary from "../model/salaryModel";
 import Leave from "../model/leaveModel";
 import User from "../model/userModel";
+import cloudinary from "../config/cloudinary";
 
 // GET all employees
 const getAllEmployees = async (req: express.Request, res: express.Response): Promise<void> => {
@@ -38,7 +37,6 @@ const getAllEmployees = async (req: express.Request, res: express.Response): Pro
 const addEmployees = async (req: express.Request, res: express.Response): Promise<void> => {
   try {
     const userId = (req as any).user.id;
-    const imagePath = req.file ? `/uploads/${req.file.filename}` : '';
 
     const {
       name,
@@ -53,35 +51,42 @@ const addEmployees = async (req: express.Request, res: express.Response): Promis
       dob
     } = req.body;
 
-    const existingEmail= await Employee.findOne({email});
-    if(existingEmail){
-      if(existingEmail.createdBy.toString()===userId){
-        res.status(400).json({message:"Employee Email ID already exists for this company"})
-      }else{
-        res.status(400).json({message:"Employee Email ID already exists for another company"})
+    // Check for existing email
+    const existingEmail = await Employee.findOne({ email });
+    if (existingEmail) {
+      if (existingEmail.createdBy.toString() === userId) {
+        res.status(400).json({ message: "Employee Email ID already exists for this company" });
+      } else {
+        res.status(400).json({ message: "Employee Email ID already exists for another company" });
       }
       return;
     }
 
-    const existingEmpId= await Employee.findOne({empId, createdBy:userId})
-    if(existingEmpId){
-      res.status(400).json({message:"Employee Id already exists for this admin"})
+    // Check for existing employee ID
+    const existingEmpId = await Employee.findOne({ empId, createdBy: userId });
+    if (existingEmpId) {
+      res.status(400).json({ message: "Employee Id already exists for this admin" });
       return;
     }
 
+    // Handle image upload to Cloudinary
+    let imageUrl = "";
+    if (req.file) {
+      const file = req.file as any; // multer-cloudinary file
+      imageUrl = file.path; // multer-storage-cloudinary returns URL in path
+    }
 
-
-    // Get admin name for password logic
+    // Generate password
     const admin = await User.findById(userId);
     if (!admin) {
       res.status(404).json({ message: "Admin not found" });
       return;
     }
-
     const adminNameFormatted = admin.adminName.replace(/\s+/g, "").toLowerCase();
     const rawPassword = `${adminNameFormatted}${phone}${empId}`;
     const hashedPassword = await bcrypt.hash(rawPassword, 10);
 
+    // Save new employee
     const newEmployee = new Employee({
       name,
       empId,
@@ -93,7 +98,7 @@ const addEmployees = async (req: express.Request, res: express.Response): Promis
       gender,
       skills,
       dob,
-      image: imagePath,
+      image: imageUrl,
       createdBy: userId,
       password: hashedPassword,
     });
@@ -115,6 +120,7 @@ const addEmployees = async (req: express.Request, res: express.Response): Promis
       image: newEmployee.image
     });
   } catch (error) {
+    console.error("Add employee error:", error);
     res.status(500).json({ message: "Failed to add employee", error });
   }
 };
@@ -131,20 +137,22 @@ const updateEmployees = async (req: express.Request, res: express.Response): Pro
       return;
     }
 
-    const {email, empId}=req.body
-    if(email){
-      const emailConflict= await Employee.findOne({email});
-      if(emailConflict && emailConflict._id.toString()!==id){
-        if(emailConflict.createdBy.toString()===userId){
-          res.status(400).json({message:"Employee email Id already exists for this company"});
-        }else{
-          res.status(400).json({message:"Employee email Id already exists for another company"});
+    const { email, empId } = req.body;
+
+    // Email conflict check
+    if (email) {
+      const emailConflict = await Employee.findOne({ email });
+      if (emailConflict && emailConflict._id.toString() !== id) {
+        if (emailConflict.createdBy.toString() === userId) {
+          res.status(400).json({ message: "Employee email Id already exists for this company" });
+        } else {
+          res.status(400).json({ message: "Employee email Id already exists for another company" });
         }
         return;
       }
     }
 
-
+    // EmpId conflict check
     if (empId) {
       const empIdConflict = await Employee.findOne({ empId, createdBy: userId });
       if (empIdConflict && empIdConflict._id.toString() !== id) {
@@ -153,25 +161,22 @@ const updateEmployees = async (req: express.Request, res: express.Response): Pro
       }
     }
 
-
-
+    // Handle image upload to Cloudinary
     if (req.file) {
-      const newImagePath = `/uploads/${req.file.filename}`;
-      const oldImagePath = path.join(__dirname, `../../${existingEmployee.image}`);
-
-      if (existingEmployee.image && fs.existsSync(oldImagePath)) {
-        fs.unlinkSync(oldImagePath);
+      // Delete old image from Cloudinary if exists
+      if (existingEmployee.image) {
+        const publicId = existingEmployee.image.split("/").pop()?.split(".")[0];
+        if (publicId) await cloudinary.uploader.destroy(`employee_images/${publicId}`);
       }
-
-      req.body.image = newImagePath;
+      const file = req.file as any;
+      req.body.image = file.path;
     }
 
-    if (req.body.removeImage === 'true' && existingEmployee.image) {
-      const oldImagePath = path.join(__dirname, `../../${existingEmployee.image}`);
-      if (fs.existsSync(oldImagePath)) {
-        fs.unlinkSync(oldImagePath);
-      }
-      req.body.image = '';
+    // Handle remove image request
+    if (req.body.removeImage === "true" && existingEmployee.image) {
+      const publicId = existingEmployee.image.split("/").pop()?.split(".")[0];
+      if (publicId) await cloudinary.uploader.destroy(`employee_images/${publicId}`);
+      req.body.image = "";
     }
 
     const updated = await Employee.findOneAndUpdate(
@@ -185,6 +190,7 @@ const updateEmployees = async (req: express.Request, res: express.Response): Pro
       ...updated?.toObject()
     });
   } catch (error) {
+    console.error("Update employee error:", error);
     res.status(500).json({ message: "Failed to update employee", error });
   }
 };
@@ -207,10 +213,10 @@ const deleteEmployees = async (req: express.Request, res: express.Response): Pro
     // Delete associated leaves
     await Leave.deleteMany({ employee: employee._id });
 
-    // Delete employee image
+    // Delete employee image from Cloudinary
     if (employee.image) {
-      const imagePath = path.join(__dirname, `../../${employee.image}`);
-      if (fs.existsSync(imagePath)) fs.unlinkSync(imagePath);
+      const publicId = employee.image.split("/").pop()?.split(".")[0];
+      if (publicId) await cloudinary.uploader.destroy(`employee_images/${publicId}`);
     }
 
     // Delete employee
@@ -218,6 +224,7 @@ const deleteEmployees = async (req: express.Request, res: express.Response): Pro
 
     res.status(200).json({ message: "Employee and associated salaries/leaves deleted successfully" });
   } catch (error) {
+    console.error("Delete employee error:", error);
     res.status(500).json({ message: "Failed to delete employee", error });
   }
 };
