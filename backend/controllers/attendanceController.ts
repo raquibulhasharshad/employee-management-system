@@ -4,18 +4,18 @@ import Attendance from "../model/attendanceModel";
 import Employee from "../model/employeeModel";
 import Holiday from "../model/holidayModel";
 
-// Utility → get today's date in IST (YYYY-MM-DD)
+// ✅ Get today's date in IST (YYYY-MM-DD)
 const getISTDate = (): string => {
   const now = new Date();
   const istTime = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
   return istTime.toISOString().split("T")[0];
 };
 
-// Utility → get current time in IST (HH:mm)
+// ✅ Get current time in IST (HH:mm)
 const getISTTime = (): string => {
   const now = new Date();
   const istTime = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
-  return istTime.toTimeString().slice(0, 5); // HH:mm in 24-hour format
+  return istTime.toTimeString().slice(0, 5); // HH:mm
 };
 
 // Admin → Open attendance for a date
@@ -146,7 +146,6 @@ const updateAttendance = async (req: Request, res: Response) => {
     }
 
     await record.save();
-
     return res.json({ success: true, record });
   } catch (err) {
     return res.status(500).json({ message: "Update failed", error: err });
