@@ -28,7 +28,10 @@ const EmployeeAttendance = () => {
       const res = await fetch(`${API_BASE_URL}/attendance/my`, { credentials: "include" });
       const data = await res.json();
 
-      const today = new Date().toLocaleDateString("en-CA");
+      // Filter out future dates
+      const todayIST = new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" });
+      const today = new Date(todayIST).toISOString().split("T")[0];
+
       const filteredData = data.filter((rec) => rec.date <= today);
       filteredData.sort((a, b) => new Date(a.date) - new Date(b.date));
 
@@ -68,11 +71,14 @@ const EmployeeAttendance = () => {
     }
   };
 
-  const today = new Date().toLocaleDateString("en-CA");
+  // Get today's date in IST (YYYY-MM-DD)
+  const todayIST = new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" });
+  const today = new Date(todayIST).toISOString().split("T")[0];
   const todayRecord = attendance.find((rec) => rec.date === today);
 
+  // Apply month/year filters
   const filteredAttendance = attendance.filter((rec) => {
-    const recDate = new Date(rec.date);
+    const recDate = new Date(new Date(rec.date).toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
     const recMonth = (recDate.getMonth() + 1).toString().padStart(2, "0");
     const recYear = recDate.getFullYear().toString();
 
