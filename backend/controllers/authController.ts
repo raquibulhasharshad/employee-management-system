@@ -25,6 +25,7 @@ const getCookieOptions = (isProduction: boolean): CookieOptions => ({
   secure: isProduction,
   sameSite: isProduction ? 'none' : 'lax',
   maxAge: 24 * 60 * 60 * 1000, // 1 day
+  path: '/', // added to make clearCookie work reliably
 });
 
 /* ---------------- Signup ---------------- */
@@ -72,7 +73,13 @@ const handleUserLogin = async (req: express.Request, res: express.Response): Pro
 /* ---------------- Logout ---------------- */
 const handleUserLogout = (req: express.Request, res: express.Response): void => {
   try {
-    res.clearCookie('uid');
+    const isProduction = process.env.NODE_ENV === 'production';
+    res.clearCookie('uid', {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
+      path: '/',
+    });
     res.status(200).json({ message: "Logout successful" });
   } catch (error) {
     res.status(500).json({ message: "Logout failed", error });
@@ -223,7 +230,15 @@ const handleDeleteAccount = async (req: express.Request, res: express.Response):
     }
 
     await User.findByIdAndDelete(userId);
-    res.clearCookie("uid");
+
+    const isProduction = process.env.NODE_ENV === 'production';
+    res.clearCookie("uid", {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
+      path: '/',
+    });
+
     res.status(200).json({ message: "Admin and all associated data deleted" });
   } catch (error) {
     res.status(500).json({ message: "Something went wrong", error });

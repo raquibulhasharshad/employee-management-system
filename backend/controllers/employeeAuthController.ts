@@ -43,6 +43,7 @@ const handleEmployeeLogin = async (
       secure: isProduction, // true only over https
       sameSite: isProduction ? "none" : "lax",
       maxAge: 2 * 60 * 60 * 1000, // 2h
+      path: "/", // ensure path is set
     });
 
     res.status(200).json({ message: "Login successful" });
@@ -57,7 +58,12 @@ const handleEmployeeLogout = async (
   res: express.Response
 ): Promise<void> => {
   try {
-    res.clearCookie("eid");
+    res.clearCookie("eid", {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? "none" : "lax",
+      path: "/", // must match cookie path
+    });
     res.status(200).json({ message: "Logout successful" });
   } catch (err) {
     res.status(500).json({ message: "Logout failed", error: err });
@@ -139,9 +145,7 @@ const handleGetEmployeeDetails = async (
 
     res.status(200).json(employee);
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Failed to fetch Employee details", error });
+    res.status(500).json({ message: "Failed to fetch Employee details", error });
   }
 };
 
