@@ -1,142 +1,145 @@
 import { Request, Response } from "express";
-import mongoose from "mongoose";
 import Attendance from "../model/attendanceModel";
 import Employee from "../model/employeeModel";
 import Holiday from "../model/holidayModel";
 
-// ✅ Get today's date in IST (YYYY-MM-DD)
-const getISTDate = (): string => {
-  const now = new Date();
-  const istTime = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
-  return istTime.toISOString().split("T")[0];
-};
-
-// ✅ Get current time in IST (HH:mm)
-const getISTTime = (): string => {
-  const now = new Date();
-  const istTime = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
-  return istTime.toTimeString().slice(0, 5); // HH:mm
-};
+// Utility → get today's local date (YYYY-MM-DD)
+const getLocalDate = () => new Date().toLocaleDateString("en-CA");
 
 // Admin → Open attendance for a date
-const openAttendanceForDate = async (req: Request, res: Response) => {
+const openAttendanceForDate = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { date } = req.body;
-    if (!date) return res.status(400).json({ message: "Date is required" });
+    let { date } = req.body;
+    if (!date) {
+      res.status(400).json({ message: "Date is required" });
+      return;
+    }
 
-    const istDate = new Date(new Date(date).toLocaleString("en-US", { timeZone: "Asia/Kolkata" }))
-      .toISOString()
-      .split("T")[0];
+    // normalize date to YYYY-MM-DD local
+    const localDate = new Date(date).toLocaleDateString("en-CA");
 
-    const holiday = await Holiday.findOne({ date: istDate });
-    if (holiday) return res.status(400).json({ message: "This date is a holiday" });
+    const holiday = await Holiday.findOne({ date: localDate });
+    if (holiday) {
+      res.status(400).json({ message: "This date is a holiday" });
+      return;
+    }
 
     const adminId = (req as any).user.id;
+
+    // Filter employees by admin
     const employees = await Employee.find({ createdBy: adminId });
 
     for (const emp of employees) {
-      const exists = await Attendance.findOne({
-        employee: new mongoose.Types.ObjectId(emp._id),
-        date: istDate,
-      });
+      const exists = await Attendance.findOne({ employee: emp._id, date: localDate });
       if (!exists) {
-        await Attendance.create({
-          employee: new mongoose.Types.ObjectId(emp._id),
-          date: istDate,
-          status: "Absent",
-          checkIn: null,
-          checkOut: null,
-        });
+        await Attendance.create({ employee: emp._id, date: localDate, status: "Absent" });
       }
     }
 
-    return res.json({ success: true, message: `Attendance opened for ${istDate}` });
+    res.json({ success: true, message: `Attendance opened for ${localDate}` });
   } catch (err) {
-    return res.status(500).json({ message: "Error opening attendance", error: err });
+    res.status(500).json({ message: "Error opening attendance", error: err });
   }
 };
 
-// Admin → View attendance by date
-const getAttendanceByDate = async (req: Request, res: Response) => {
+// Admin → View attendance by date (only this admin's employees)
+const getAttendanceByDate = async (req: Request, res: Response): Promise<void> => {
   try {
     const { date } = req.params;
-    const istDate = new Date(new Date(date).toLocaleString("en-US", { timeZone: "Asia/Kolkata" }))
-      .toISOString()
-      .split("T")[0];
+    const localDate = new Date(date).toLocaleDateString("en-CA");
 
     const adminId = (req as any).user.id;
     const employees = await Employee.find({ createdBy: adminId }).select("_id");
-    const employeeIds = employees.map((e) => new mongoose.Types.ObjectId(e._id));
+    const employeeIds = employees.map((e) => e._id);
 
-    const records = await Attendance.find({
-      date: istDate,
-      employee: { $in: employeeIds },
-    }).populate("employee", "name image empId department");
+    const records = await Attendance.find({ date: localDate, employee: { $in: employeeIds } }).populate(
+      "employee",
+      "name image empId department"
+    );
 
-    return res.json(records);
+    res.json(records);
   } catch (err) {
-    return res.status(500).json({ message: "Error fetching attendance", error: err });
+    res.status(500).json({ message: "Error fetching attendance", error: err });
   }
 };
 
 // Employee → Check-in
-const checkIn = async (req: Request, res: Response) => {
+const checkIn = async (req: Request, res: Response): Promise<void> => {
   try {
     const employeeId = (req as any)?.user?._id;
-    const today = getISTDate();
+    const today = getLocalDate();
 
-    const record = await Attendance.findOne({
-      employee: new mongoose.Types.ObjectId(employeeId),
-      date: today,
+    const record = await Attendance.findOne({ employee: employeeId, date: today });
+    if (!record) {
+      res.status(400).json({ message: "Attendance not opened for today" });
+      return;
+    }
+
+    if (record.checkIn) {
+      res.status(400).json({ message: "Already checked in" });
+      return;
+    }
+
+    record.checkIn = new Date().toLocaleTimeString("en-GB", {
+      hour: "2-digit",
+      minute: "2-digit",
     });
-    if (!record) return res.status(400).json({ message: "Attendance not opened for today" });
-    if (record.checkIn) return res.status(400).json({ message: "Already checked in" });
-
-    record.checkIn = getISTTime();
     record.status = "Present";
     await record.save();
 
-    return res.json({ success: true, record });
+    res.json({ success: true, record });
   } catch (err) {
-    return res.status(500).json({ message: "Check-in failed", error: err });
+    res.status(500).json({ message: "Check-in failed", error: err });
   }
 };
 
 // Employee → Check-out
-const checkOut = async (req: Request, res: Response) => {
+const checkOut = async (req: Request, res: Response): Promise<void> => {
   try {
     const employeeId = (req as any)?.user?._id;
-    const today = getISTDate();
+    const today = getLocalDate();
 
-    const record = await Attendance.findOne({
-      employee: new mongoose.Types.ObjectId(employeeId),
-      date: today,
+    const record = await Attendance.findOne({ employee: employeeId, date: today });
+    if (!record) {
+      res.status(400).json({ message: "Attendance not opened for today" });
+      return;
+    }
+
+    if (record.checkOut) {
+      res.status(400).json({ message: "Already checked out" });
+      return;
+    }
+
+    record.checkOut = new Date().toLocaleTimeString("en-GB", {
+      hour: "2-digit",
+      minute: "2-digit",
     });
-    if (!record) return res.status(400).json({ message: "Attendance not opened for today" });
-    if (record.checkOut) return res.status(400).json({ message: "Already checked out" });
-
-    record.checkOut = getISTTime();
     if (!record.checkIn) record.status = "Half-day";
     await record.save();
 
-    return res.json({ success: true, record });
+    res.json({ success: true, record });
   } catch (err) {
-    return res.status(500).json({ message: "Check-out failed", error: err });
+    res.status(500).json({ message: "Check-out failed", error: err });
   }
 };
 
-// Admin → Update attendance manually
-const updateAttendance = async (req: Request, res: Response) => {
+// Admin → Update attendance manually (status + check-in/out)
+const updateAttendance = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const { status, checkIn, checkOut } = req.body;
 
     const record = await Attendance.findById(id);
-    if (!record) return res.status(404).json({ message: "Record not found" });
+    if (!record) {
+      res.status(404).json({ message: "Record not found" });
+      return;
+    }
 
+    // Update check-in/out times
     record.checkIn = checkIn || null;
     record.checkOut = checkOut || null;
 
+    // Update status if not explicitly provided
     if (!status) {
       if (record.checkIn && !record.checkOut) record.status = "Present";
       else if (!record.checkIn && !record.checkOut) record.status = "Absent";
@@ -146,23 +149,21 @@ const updateAttendance = async (req: Request, res: Response) => {
     }
 
     await record.save();
-    return res.json({ success: true, record });
+
+    res.json({ success: true, record });
   } catch (err) {
-    return res.status(500).json({ message: "Update failed", error: err });
+    res.status(500).json({ message: "Update failed", error: err });
   }
 };
 
 // Employee → View my attendance
-const getMyAttendance = async (req: Request, res: Response) => {
+const getMyAttendance = async (req: Request, res: Response): Promise<void> => {
   try {
     const employeeId = (req as any)?.user?._id;
-    const records = await Attendance.find({
-      employee: new mongoose.Types.ObjectId(employeeId),
-    }).sort({ date: -1 });
-
-    return res.json(records);
+    const records = await Attendance.find({ employee: employeeId }).sort({ date: -1 });
+    res.json(records);
   } catch (err) {
-    return res.status(500).json({ message: "Error fetching attendance", error: err });
+    res.status(500).json({ message: "Error fetching attendance", error: err });
   }
 };
 
