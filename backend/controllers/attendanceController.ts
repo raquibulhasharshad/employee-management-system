@@ -3,8 +3,19 @@ import Attendance from "../model/attendanceModel";
 import Employee from "../model/employeeModel";
 import Holiday from "../model/holidayModel";
 
-// Utility → get today's local date (YYYY-MM-DD)
-const getLocalDate = (): string => new Date().toLocaleDateString("en-CA");
+// ✅ Get today's date in IST (YYYY-MM-DD)
+const getISTDate = (): string => {
+  const now = new Date();
+  const ist = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
+  return ist.toISOString().split("T")[0]; // YYYY-MM-DD
+};
+
+// ✅ Get current time in IST (HH:mm)
+const getISTTime = (): string => {
+  const now = new Date();
+  const ist = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
+  return ist.toTimeString().slice(0, 5); // HH:mm
+};
 
 // Admin → Open attendance for a date
 const openAttendanceForDate = async (req: Request, res: Response): Promise<void> => {
@@ -15,9 +26,11 @@ const openAttendanceForDate = async (req: Request, res: Response): Promise<void>
       return;
     }
 
-    const localDate = new Date(date).toLocaleDateString("en-CA");
+    const istDate = new Date(new Date(date).toLocaleString("en-US", { timeZone: "Asia/Kolkata" }))
+      .toISOString()
+      .split("T")[0];
 
-    const holiday = await Holiday.findOne({ date: localDate });
+    const holiday = await Holiday.findOne({ date: istDate });
     if (holiday) {
       res.status(400).json({ message: "This date is a holiday" });
       return;
@@ -32,23 +45,25 @@ const openAttendanceForDate = async (req: Request, res: Response): Promise<void>
     const employees = await Employee.find({ createdBy: adminId });
 
     for (const emp of employees) {
-      const exists = await Attendance.findOne({ employee: emp._id, date: localDate });
+      const exists = await Attendance.findOne({ employee: emp._id, date: istDate });
       if (!exists) {
-        await Attendance.create({ employee: emp._id, date: localDate, status: "Absent", checkIn: null, checkOut: null });
+        await Attendance.create({ employee: emp._id, date: istDate, status: "Absent", checkIn: null, checkOut: null });
       }
     }
 
-    res.json({ success: true, message: `Attendance opened for ${localDate}` });
+    res.json({ success: true, message: `Attendance opened for ${istDate}` });
   } catch (err) {
     res.status(500).json({ message: "Error opening attendance", error: err });
   }
 };
 
-// Admin → View attendance by date (only this admin's employees)
+// Admin → View attendance by date
 const getAttendanceByDate = async (req: Request, res: Response): Promise<void> => {
   try {
     const { date } = req.params;
-    const localDate = new Date(date).toLocaleDateString("en-CA");
+    const istDate = new Date(new Date(date).toLocaleString("en-US", { timeZone: "Asia/Kolkata" }))
+      .toISOString()
+      .split("T")[0];
 
     const adminId = (req as any).user?.id;
     if (!adminId) {
@@ -59,7 +74,7 @@ const getAttendanceByDate = async (req: Request, res: Response): Promise<void> =
     const employees = await Employee.find({ createdBy: adminId }).select("_id");
     const employeeIds = employees.map((e) => e._id);
 
-    const records = await Attendance.find({ date: localDate, employee: { $in: employeeIds } }).populate(
+    const records = await Attendance.find({ date: istDate, employee: { $in: employeeIds } }).populate(
       "employee",
       "name image empId department"
     );
@@ -79,7 +94,7 @@ const checkIn = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const today = getLocalDate();
+    const today = getISTDate();
 
     const record = await Attendance.findOne({ employee: employeeId, date: today });
     if (!record) {
@@ -92,7 +107,7 @@ const checkIn = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    record.checkIn = new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+    record.checkIn = getISTTime();
     record.status = "Present";
     await record.save();
 
@@ -111,7 +126,7 @@ const checkOut = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const today = getLocalDate();
+    const today = getISTDate();
 
     const record = await Attendance.findOne({ employee: employeeId, date: today });
     if (!record) {
@@ -124,7 +139,7 @@ const checkOut = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    record.checkOut = new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+    record.checkOut = getISTTime();
     if (!record.checkIn) record.status = "Half-day";
     await record.save();
 
@@ -134,7 +149,7 @@ const checkOut = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-// Admin → Update attendance manually (status + check-in/out)
+// Admin → Update attendance manually
 const updateAttendance = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
