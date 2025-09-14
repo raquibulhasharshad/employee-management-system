@@ -4,18 +4,17 @@ import Employee from "../model/employeeModel";
 import Holiday from "../model/holidayModel";
 
 // Utility → get today's local date (YYYY-MM-DD)
-const getLocalDate = () => new Date().toLocaleDateString("en-CA");
+const getLocalDate = (): string => new Date().toLocaleDateString("en-CA");
 
 // Admin → Open attendance for a date
 const openAttendanceForDate = async (req: Request, res: Response): Promise<void> => {
   try {
-    let { date } = req.body;
+    const { date } = req.body;
     if (!date) {
       res.status(400).json({ message: "Date is required" });
       return;
     }
 
-    // normalize date to YYYY-MM-DD local
     const localDate = new Date(date).toLocaleDateString("en-CA");
 
     const holiday = await Holiday.findOne({ date: localDate });
@@ -24,15 +23,18 @@ const openAttendanceForDate = async (req: Request, res: Response): Promise<void>
       return;
     }
 
-    const adminId = (req as any).user.id;
+    const adminId = (req as any).user?.id;
+    if (!adminId) {
+      res.status(401).json({ message: "Unauthorized" });
+      return;
+    }
 
-    // Filter employees by admin
     const employees = await Employee.find({ createdBy: adminId });
 
     for (const emp of employees) {
       const exists = await Attendance.findOne({ employee: emp._id, date: localDate });
       if (!exists) {
-        await Attendance.create({ employee: emp._id, date: localDate, status: "Absent" });
+        await Attendance.create({ employee: emp._id, date: localDate, status: "Absent", checkIn: null, checkOut: null });
       }
     }
 
@@ -48,7 +50,12 @@ const getAttendanceByDate = async (req: Request, res: Response): Promise<void> =
     const { date } = req.params;
     const localDate = new Date(date).toLocaleDateString("en-CA");
 
-    const adminId = (req as any).user.id;
+    const adminId = (req as any).user?.id;
+    if (!adminId) {
+      res.status(401).json({ message: "Unauthorized" });
+      return;
+    }
+
     const employees = await Employee.find({ createdBy: adminId }).select("_id");
     const employeeIds = employees.map((e) => e._id);
 
@@ -67,6 +74,11 @@ const getAttendanceByDate = async (req: Request, res: Response): Promise<void> =
 const checkIn = async (req: Request, res: Response): Promise<void> => {
   try {
     const employeeId = (req as any)?.user?._id;
+    if (!employeeId) {
+      res.status(401).json({ message: "Unauthorized" });
+      return;
+    }
+
     const today = getLocalDate();
 
     const record = await Attendance.findOne({ employee: employeeId, date: today });
@@ -80,10 +92,7 @@ const checkIn = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    record.checkIn = new Date().toLocaleTimeString("en-GB", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+    record.checkIn = new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
     record.status = "Present";
     await record.save();
 
@@ -97,6 +106,11 @@ const checkIn = async (req: Request, res: Response): Promise<void> => {
 const checkOut = async (req: Request, res: Response): Promise<void> => {
   try {
     const employeeId = (req as any)?.user?._id;
+    if (!employeeId) {
+      res.status(401).json({ message: "Unauthorized" });
+      return;
+    }
+
     const today = getLocalDate();
 
     const record = await Attendance.findOne({ employee: employeeId, date: today });
@@ -110,10 +124,7 @@ const checkOut = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    record.checkOut = new Date().toLocaleTimeString("en-GB", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+    record.checkOut = new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
     if (!record.checkIn) record.status = "Half-day";
     await record.save();
 
@@ -135,18 +146,10 @@ const updateAttendance = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    // Update check-in/out times
     record.checkIn = checkIn || null;
     record.checkOut = checkOut || null;
 
-    // Update status if not explicitly provided
-    if (!status) {
-      if (record.checkIn && !record.checkOut) record.status = "Present";
-      else if (!record.checkIn && !record.checkOut) record.status = "Absent";
-      else if (record.checkIn && record.checkOut) record.status = "Present";
-    } else {
-      record.status = status;
-    }
+    record.status = status || (record.checkIn || record.checkOut ? "Present" : "Absent");
 
     await record.save();
 
@@ -160,6 +163,11 @@ const updateAttendance = async (req: Request, res: Response): Promise<void> => {
 const getMyAttendance = async (req: Request, res: Response): Promise<void> => {
   try {
     const employeeId = (req as any)?.user?._id;
+    if (!employeeId) {
+      res.status(401).json({ message: "Unauthorized" });
+      return;
+    }
+
     const records = await Attendance.find({ employee: employeeId }).sort({ date: -1 });
     res.json(records);
   } catch (err) {
