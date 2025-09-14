@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import mongoose from "mongoose";
 import Attendance from "../model/attendanceModel";
 import Employee from "../model/employeeModel";
 import Holiday from "../model/holidayModel";
@@ -34,10 +35,13 @@ const openAttendanceForDate = async (req: Request, res: Response) => {
     const employees = await Employee.find({ createdBy: adminId });
 
     for (const emp of employees) {
-      const exists = await Attendance.findOne({ employee: emp._id, date: istDate });
+      const exists = await Attendance.findOne({
+        employee: new mongoose.Types.ObjectId(emp._id),
+        date: istDate,
+      });
       if (!exists) {
         await Attendance.create({
-          employee: emp._id,
+          employee: new mongoose.Types.ObjectId(emp._id),
           date: istDate,
           status: "Absent",
           checkIn: null,
@@ -62,12 +66,12 @@ const getAttendanceByDate = async (req: Request, res: Response) => {
 
     const adminId = (req as any).user.id;
     const employees = await Employee.find({ createdBy: adminId }).select("_id");
-    const employeeIds = employees.map((e) => e._id);
+    const employeeIds = employees.map((e) => new mongoose.Types.ObjectId(e._id));
 
-    const records = await Attendance.find({ date: istDate, employee: { $in: employeeIds } }).populate(
-      "employee",
-      "name image empId department"
-    );
+    const records = await Attendance.find({
+      date: istDate,
+      employee: { $in: employeeIds },
+    }).populate("employee", "name image empId department");
 
     return res.json(records);
   } catch (err) {
@@ -81,7 +85,10 @@ const checkIn = async (req: Request, res: Response) => {
     const employeeId = (req as any)?.user?._id;
     const today = getISTDate();
 
-    const record = await Attendance.findOne({ employee: employeeId, date: today });
+    const record = await Attendance.findOne({
+      employee: new mongoose.Types.ObjectId(employeeId),
+      date: today,
+    });
     if (!record) return res.status(400).json({ message: "Attendance not opened for today" });
     if (record.checkIn) return res.status(400).json({ message: "Already checked in" });
 
@@ -101,7 +108,10 @@ const checkOut = async (req: Request, res: Response) => {
     const employeeId = (req as any)?.user?._id;
     const today = getISTDate();
 
-    const record = await Attendance.findOne({ employee: employeeId, date: today });
+    const record = await Attendance.findOne({
+      employee: new mongoose.Types.ObjectId(employeeId),
+      date: today,
+    });
     if (!record) return res.status(400).json({ message: "Attendance not opened for today" });
     if (record.checkOut) return res.status(400).json({ message: "Already checked out" });
 
@@ -147,7 +157,10 @@ const updateAttendance = async (req: Request, res: Response) => {
 const getMyAttendance = async (req: Request, res: Response) => {
   try {
     const employeeId = (req as any)?.user?._id;
-    const records = await Attendance.find({ employee: employeeId }).sort({ date: -1 });
+    const records = await Attendance.find({
+      employee: new mongoose.Types.ObjectId(employeeId),
+    }).sort({ date: -1 });
+
     return res.json(records);
   } catch (err) {
     return res.status(500).json({ message: "Error fetching attendance", error: err });
